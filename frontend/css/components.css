@@ -1,0 +1,371 @@
+/* ==========================================================================
+   WorkCred Components v2 – Community Narrative
+   Civic-gravity design: no full-pill buttons, warm organic shapes.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Layout Container
+   -------------------------------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-md);
+  padding-right: var(--space-md);
+}
+@media (min-width: 768px) {
+  .container {
+    padding-left: var(--space-xl);
+    padding-right: var(--space-xl);
+  }
+}
+@media (min-width: 1280px) {
+  .container {
+    padding-left: var(--space-3xl);
+    padding-right: var(--space-3xl);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Buttons – civic gravity, 8px radius, no pills
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 48px;
+  padding: 0 var(--space-lg);
+  border-radius: var(--radius-input);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  border: 1.5px solid transparent;
+  transition:
+    background-color var(--duration-fast) var(--ease-spring),
+    transform var(--duration-fast) var(--ease-spring),
+    border-color var(--duration-fast) var(--ease-spring);
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+
+/* Primary – terracotta */
+.btn-primary {
+  background-color: var(--clay);
+  color: var(--paper);
+  border-color: var(--clay);
+}
+.btn-primary:hover { background-color: var(--clay-dark); border-color: var(--clay-dark); }
+
+/* Secondary – moss */
+.btn-moss {
+  background-color: var(--moss);
+  color: var(--paper);
+  border-color: var(--moss);
+}
+.btn-moss:hover { background-color: var(--moss-light); }
+
+/* Outline – charcoal border */
+.btn-outline {
+  background-color: transparent;
+  color: var(--charcoal);
+  border-color: var(--charcoal);
+}
+.btn-outline:hover { background-color: var(--linen); }
+
+/* Ghost / subdued */
+.btn-ghost {
+  background-color: var(--linen);
+  color: var(--charcoal);
+  border-color: var(--border);
+}
+.btn-ghost:hover { background-color: var(--parchment); }
+
+/* Dark */
+.btn-dark {
+  background-color: var(--charcoal);
+  color: var(--paper);
+  border-color: var(--charcoal);
+}
+.btn-dark:hover { background-color: var(--charcoal-soft); }
+
+/* Arrow transit button – square-ish, civic feel */
+.btn-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background-color: var(--clay);
+  color: var(--paper);
+  border: none;
+  transition: background-color var(--duration-fast), transform var(--duration-fast);
+}
+.btn-arrow:hover { background-color: var(--clay-dark); transform: translateX(2px); }
+.btn-arrow svg { width: 18px; height: 18px; }
+
+/* --------------------------------------------------------------------------
+   Chips & Badges – 6px radius per civic system
+   -------------------------------------------------------------------------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-2xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  line-height: 1;
+}
+
+.chip-clay { background-color: var(--clay-tint); color: var(--clay); border-color: #eccdc0; }
+.chip-moss { background-color: var(--moss-tint); color: var(--moss); border-color: #b8dac2; }
+.chip-ochre { background-color: var(--ochre-tint); color: var(--ochre); border-color: #f0deb4; }
+.chip-neutral { background-color: var(--linen); color: var(--stone); border-color: var(--border); }
+.chip-dark { background-color: var(--charcoal); color: var(--paper); border-color: var(--charcoal); }
+.chip-paper { background-color: var(--paper); color: var(--charcoal); border-color: var(--border); }
+.chip-green { background-color: var(--moss-tint); color: var(--moss); border-color: #b8dac2; }
+
+.chip-interactive {
+  min-height: 36px;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-label);
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+}
+.chip-interactive:hover { background-color: var(--parchment); }
+.chip-interactive.is-active { background-color: var(--charcoal); color: var(--paper); border-color: var(--charcoal); }
+
+/* --------------------------------------------------------------------------
+   Cards – civic dossier style
+   -------------------------------------------------------------------------- */
+.card {
+  background-color: var(--linen);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: var(--space-lg);
+  position: relative;
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+.card:hover { border-color: var(--clay); box-shadow: var(--shadow-sm); }
+
+.card-paper {
+  background-color: var(--paper);
+  border-color: var(--border);
+}
+.card-parchment {
+  background-color: var(--parchment);
+  border-color: var(--border-strong);
+}
+.card-charcoal {
+  background-color: var(--charcoal);
+  color: var(--paper);
+  border-color: var(--charcoal-soft);
+}
+.card-charcoal h2, .card-charcoal h3, .card-charcoal h4 { color: var(--paper); }
+.card-charcoal p { color: var(--border); }
+
+/* --------------------------------------------------------------------------
+   Live Pulse Dot
+   -------------------------------------------------------------------------- */
+.pulse-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--moss);
+}
+.pulse-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-color: var(--moss);
+  opacity: 0.5;
+  animation: pulse-ring 2s ease infinite;
+}
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   Top Bar
+   -------------------------------------------------------------------------- */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 68px;
+  z-index: 100;
+  background-color: var(--paper);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+}
+
+.top-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 100%;
+  padding-left: var(--space-md);
+  padding-right: var(--space-md);
+}
+@media (min-width: 768px) {
+  .top-bar-inner {
+    padding-left: var(--space-xl);
+    padding-right: var(--space-xl);
+  }
+}
+
+/* Brand */
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  text-decoration: none;
+}
+.brand-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background-color: var(--charcoal);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.brand-mark {
+  display: block;
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.brand-wordmark {
+  display: block;
+  width: 132px;
+  height: auto;
+  object-fit: contain;
+}
+.brand-name {
+  font-family: var(--font-serif);
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.brand-name em { color: var(--clay); font-style: italic; }
+.brand-tagline {
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--stone);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: block;
+  margin-top: 2px;
+}
+
+/* Desktop nav */
+.top-nav { display: none; }
+@media (min-width: 1024px) {
+  .top-nav {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .nav-link {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-body);
+    font-weight: 500;
+    color: var(--stone);
+    border-radius: var(--radius-md);
+    transition: color var(--duration-fast), background-color var(--duration-fast);
+  }
+  .nav-link:hover { color: var(--charcoal); background-color: var(--linen); }
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* --------------------------------------------------------------------------
+   Sticky Mobile CTA
+   -------------------------------------------------------------------------- */
+.sticky-mobile-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: var(--space-xs) var(--space-md);
+  padding-bottom: calc(var(--space-xs) + env(safe-area-inset-bottom, 0px));
+  background-color: var(--paper);
+  border-top: 1px solid var(--border);
+  z-index: 90;
+  display: flex;
+  gap: var(--space-xs);
+}
+@media (min-width: 768px) { .sticky-mobile-cta { display: none; } }
+.sticky-mobile-cta .btn { flex: 1; min-height: 44px; }
+
+/* --------------------------------------------------------------------------
+   Input Controls
+   -------------------------------------------------------------------------- */
+.input-control {
+  width: 100%;
+  height: 48px;
+  padding: 0 var(--space-md);
+  border-radius: var(--radius-input);
+  background-color: var(--paper);
+  border: 1.5px solid var(--border-strong);
+  color: var(--charcoal);
+  font-size: var(--text-body-lg);
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+.input-control::placeholder { color: var(--river); }
+.input-control:focus {
+  outline: none;
+  border-color: var(--clay);
+  box-shadow: 0 0 0 3px rgba(200, 90, 50, 0.15);
+}
+
+/* --------------------------------------------------------------------------
+   Divider
+   -------------------------------------------------------------------------- */
+.divider {
+  width: 1px;
+  background-color: var(--border);
+  align-self: stretch;
+}
+
+/* --------------------------------------------------------------------------
+   Section Label / Eyebrow
+   -------------------------------------------------------------------------- */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--clay);
+}
+.eyebrow-moss { color: var(--moss); }

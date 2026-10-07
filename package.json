@@ -1,0 +1,30 @@
+{
+  "name": "workcred",
+  "version": "1.0.0",
+  "description": "Proof of work, work near you. Mobile-first PWA for verified daily-wage work history and local hiring.",
+  "type": "module",
+  "scripts": {
+    "dev": "http-server frontend -p 3000 -c-1 -o",
+    "serve": "http-server frontend -p 3000 -c-1",
+    "vendor": "node scripts/vendor-copy.js",
+    "lint": "eslint frontend/js/landing.js frontend/js/motion.js shared/constants.js",
+    "format": "prettier --write \"frontend/**/*.{html,css,js}\" \"shared/**/*.js\" \"docs/**/*.md\""
+  },
+  "keywords": [
+    "workcred",
+    "pwa",
+    "marketplace",
+    "proof-of-work"
+  ],
+  "author": "WorkCred Team",
+  "license": "ISC",
+  "dependencies": {
+    "gsap": "^3.12.5",
+    "lenis": "^1.1.20"
+  },
+  "devDependencies": {
+    "eslint": "^9.20.0",
+    "http-server": "^14.1.1",
+    "prettier": "^3.5.0"
+  }
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <rect width="160" height="160" rx="32" fill="#E3EBFA"/>
+  <circle cx="80" cy="62" r="34" fill="#2457C5" opacity="0.3"/>
+  <circle cx="80" cy="58" r="26" fill="#2457C5"/>
+  <path d="M30 145 C30 105, 55 98, 80 98 C105 98, 130 105, 130 145 Z" fill="#2457C5"/>
+  <rect x="52" y="104" width="56" height="18" rx="9" fill="#14171A"/>
+  <text x="80" y="117" font-family="'Inter', sans-serif" font-size="9" font-weight="700" fill="#DFF84C" text-anchor="middle" letter-spacing="0.5">CARPENTER</text>
+  <circle cx="112" cy="40" r="14" fill="#DFF84C"/>
+  <path d="M107 40 L110 43 L117 36" stroke="#14171A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

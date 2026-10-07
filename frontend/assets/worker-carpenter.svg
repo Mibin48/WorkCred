@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 366 488" width="366" height="488">
+  <defs>
+    <radialGradient id="bg-worker-carpenter.svg" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#d49b35" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#a07025"/>
+    </radialGradient>
+    <clipPath id="clip-worker-carpenter.svg">
+      <rect width="366" height="488" rx="0"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#clip-worker-carpenter.svg)">
+    <!-- Background -->
+    <rect width="366" height="488" fill="url(#bg-worker-carpenter.svg)"/>
+    <!-- Subtle texture dots -->
+    <circle cx="30" cy="30" r="80" fill="#a07025" opacity="0.25"/>
+    <circle cx="340" cy="440" r="100" fill="#a07025" opacity="0.2"/>
+
+    <!-- Body / torso (shirt) -->
+    <ellipse cx="183" cy="430" rx="130" ry="80" fill="#16130f"/>
+    <ellipse cx="183" cy="370" rx="100" ry="65" fill="#23201e"/>
+    <!-- Neck -->
+    <rect x="165" y="285" width="36" height="50" rx="10" fill="#8c5a30"/>
+    <!-- Head -->
+    <ellipse cx="183" cy="260" rx="66" ry="75" fill="#b07850"/>
+    <!-- Face shading -->
+    <ellipse cx="183" cy="270" rx="54" ry="60" fill="#b07850" opacity="0.6"/>
+    <!-- Eyes -->
+    <ellipse cx="160" cy="250" rx="8" ry="9" fill="#23201e"/>
+    <ellipse cx="206" cy="250" rx="8" ry="9" fill="#23201e"/>
+    <ellipse cx="158" cy="248" rx="3" ry="3" fill="#ffffff" opacity="0.5"/>
+    <ellipse cx="204" cy="248" rx="3" ry="3" fill="#ffffff" opacity="0.5"/>
+    <!-- Eyebrows -->
+    <path d="M150 236 Q162 230 170 237" stroke="#5c544e" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M196 237 Q204 230 216 236" stroke="#5c544e" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <!-- Nose -->
+    <path d="M183 255 Q178 270 183 278 Q188 270 183 255" fill="#8c5a30" opacity="0.5"/>
+    <!-- Smile -->
+    <path d="M166 292 Q183 306 200 292" stroke="#8c5a30" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- Ears -->
+    <ellipse cx="117" cy="260" rx="12" ry="16" fill="#8c5a30"/>
+    <ellipse cx="249" cy="260" rx="12" ry="16" fill="#8c5a30"/>
+    <!-- Hair (simple) -->
+    <ellipse cx="183" cy="190" rx="68" ry="38" fill="#23201e"/>
+    <!-- Trade icon overlay -->
+    <!-- Hammer -->
+      <rect x="178" y="194" width="18" height="8" rx="4" fill="#d49b35"/>
+      <rect x="183" y="200" width="4" height="18" rx="2" fill="#c8856a"/>
+  </g>
+</svg>

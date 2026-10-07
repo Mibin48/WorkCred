@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WorkCred — Coming Soon</title>
+    <meta name="description" content="WorkCred application early access onboarding." />
+    <meta name="theme-color" content="#14171A" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="assets/icons/workcred-icon-192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="assets/icons/workcred-icon-192.png" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;800&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
+  </head>
+  <body
+    style="min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between"
+  >
+    <header class="top-bar">
+      <div class="top-bar-inner">
+        <a href="index.html" class="brand-logo" aria-label="WorkCred home">
+          <img class="brand-mark" src="assets/workcred-mark.png" alt="" aria-hidden="true" width="38" height="38" />
+          <div class="brand-text-wrap">
+            <span class="brand-name">WorkCred</span>
+            <span class="brand-tagline">Proof • Near You</span>
+          </div>
+        </a>
+        <a
+          href="index.html"
+          class="btn btn-surface"
+          style="min-height: 44px; padding: 0 var(--space-md)"
+          >&larr; Back to Home</a
+        >
+      </div>
+    </header>
+
+    <main style="padding-top: calc(72px + var(--space-2xl)); padding-bottom: var(--space-3xl)">
+      <div class="container" style="max-width: 640px; text-align: center">
+        <div class="card card-ink" style="padding: var(--space-2xl) var(--space-lg)">
+          <div class="chip chip-lime" id="role-chip" style="margin-bottom: var(--space-md)">
+            Early Access
+          </div>
+          <h1
+            style="color: var(--surface); margin-bottom: var(--space-md); font-size: var(--text-h2)"
+          >
+            App Onboarding Coming Soon
+          </h1>
+          <p
+            style="
+              color: var(--gray-300);
+              font-size: var(--text-body-lg);
+              margin-bottom: var(--space-xl);
+            "
+            id="role-description"
+          >
+            We are rolling out WorkCred sector by sector across your city. Enter your phone number
+            below to get notified first with zero setup fees.
+          </p>
+
+          <form
+            action="#"
+            method="POST"
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: var(--space-sm);
+              max-width: 400px;
+              margin: 0 auto;
+            "
+            onsubmit="
+              event.preventDefault();
+              alert('Thank you! You have been added to the early access queue.');
+            "
+          >
+            <input
+              type="tel"
+              class="input-control"
+              placeholder="10-digit mobile number"
+              required
+              pattern="[0-9]{10}"
+              aria-label="Mobile Number"
+            />
+            <button type="submit" class="btn btn-primary" style="width: 100%">
+              Get Early Access via SMS
+            </button>
+          </form>
+
+          <div
+            style="
+              margin-top: var(--space-lg);
+              font-size: var(--text-caption);
+              color: var(--gray-300);
+            "
+          >
+            100% Free • No spam • Works on basic feature phones &amp; smartphones
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer" style="padding: var(--space-md) 0">
+      <div
+        class="container"
+        style="text-align: center; font-size: var(--text-caption); color: var(--gray-600)"
+      >
+        Made for India's working people • © 2025 WorkCred India. All rights reserved.
+      </div>
+    </footer>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const role = params.get('role');
+      const chip = document.getElementById('role-chip');
+      const desc = document.getElementById('role-description');
+      if (role === 'worker') {
+        chip.textContent = 'Worker Registration Queue';
+        desc.textContent =
+          'Build your verified skill passport, log hours, and receive direct cash job requests from neighbors with ₹0 commission cut.';
+      } else if (role === 'customer') {
+        chip.textContent = 'Customer Priority Access';
+        desc.textContent =
+          'Find verified, ID-checked technicians within walking distance with transparent benchmark rates and double OTP handshake safety.';
+      }
+    </script>
+  </body>
+</html>
