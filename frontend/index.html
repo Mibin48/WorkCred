@@ -82,8 +82,27 @@
           style="min-height:40px;padding:0 var(--space-md);font-size:var(--text-body);display:none;">Join free</a>
       </div>
 
+      <button class="mobile-nav-toggle" id="mobile-nav-toggle" type="button" aria-label="Open navigation menu"
+        aria-expanded="false" aria-controls="mobile-navigation">
+        <span></span><span></span>
+      </button>
+
     </div>
   </header>
+
+  <div class="mobile-nav-panel" id="mobile-navigation" aria-hidden="true">
+    <nav class="mobile-nav-content" aria-label="Mobile primary navigation">
+      <span class="eyebrow eyebrow-moss">Your neighbourhood</span>
+      <a href="#how-it-works" class="mobile-nav-link">How it works <span>01</span></a>
+      <a href="#workers" class="mobile-nav-link">Find workers <span>02</span></a>
+      <a href="#rates" class="mobile-nav-link">Fair wages <span>03</span></a>
+      <a href="#stories" class="mobile-nav-link">Stories <span>04</span></a>
+      <div class="mobile-nav-actions">
+        <a href="/login.html" class="btn btn-outline">Log in</a>
+        <a href="/onboard.html?role=worker" class="btn btn-primary mobile-nav-join">Join free</a>
+      </div>
+    </nav>
+  </div>
 
   <!-- ============================================================
      MAIN CONTENT
@@ -151,7 +170,7 @@
           </div>
 
           <!-- Portrait card column -->
-          <div class="hero-portrait-card fade-up" style="transition-delay:120ms;" aria-hidden="true">
+          <div class="hero-portrait-card fade-up" style="transition-delay:120ms;">
             <div style="position:relative;">
               <img src="/assets/images/worker-electrician.jpg" alt="Ravi Kumar, Master Electrician, Pune"
                 class="hero-portrait-img" width="366" height="488" />
@@ -181,10 +200,6 @@
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="hero-portrait-caption-sub">
-              <span>Last job: 3 hrs ago</span>
-              <span style="color:var(--clay);font-weight:600;">View full record →</span>
             </div>
           </div>
 
@@ -815,6 +830,38 @@
       { threshold: 0 }
     );
     scrollWatcher.observe(document.querySelector('.hero-section'));
+
+    // ── Mobile navigation drawer ────────────────────────────────
+    const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+    const mobileNavPanel = document.getElementById('mobile-navigation');
+    const mobileNavLinks = mobileNavPanel.querySelectorAll('a');
+
+    function setMobileNavOpen(isOpen, restoreFocus = true) {
+      mobileNavToggle.setAttribute('aria-expanded', String(isOpen));
+      mobileNavToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+      mobileNavPanel.setAttribute('aria-hidden', String(!isOpen));
+      mobileNavPanel.classList.toggle('is-open', isOpen);
+      document.body.classList.toggle('nav-open', isOpen);
+      if (isOpen) mobileNavLinks[0].focus();
+      else if (restoreFocus) mobileNavToggle.focus();
+    }
+
+    mobileNavToggle.addEventListener('click', () => {
+      setMobileNavOpen(mobileNavToggle.getAttribute('aria-expanded') !== 'true');
+    });
+    mobileNavPanel.addEventListener('click', event => {
+      if (event.target === mobileNavPanel) setMobileNavOpen(false);
+    });
+    mobileNavLinks.forEach(link => link.addEventListener('click', () => setMobileNavOpen(false)));
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && mobileNavToggle.getAttribute('aria-expanded') === 'true') {
+        setMobileNavOpen(false);
+      }
+    });
+    window.matchMedia('(min-width: 768px)').addEventListener('change', event => {
+      if (event.matches && mobileNavToggle.getAttribute('aria-expanded') === 'true') setMobileNavOpen(false, false);
+    });
+
   </script>
 
 </body>
