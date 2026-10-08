@@ -1051,10 +1051,6 @@
     gap: clamp(2rem, 4vw, 4rem);
   }
 
-  .field-note-offset {
-    margin-left: 22px;
-  }
-
   .field-notes {
     padding-top: var(--space-xl);
   }
