@@ -7,7 +7,9 @@
     "dev": "http-server frontend -p 3000 -c-1 -o",
     "serve": "http-server frontend -p 3000 -c-1",
     "vendor": "node scripts/vendor-copy.js",
-    "lint": "eslint frontend/js/landing.js frontend/js/motion.js shared/constants.js",
+    "test": "node --test tests/**/*.test.js",
+    "lint": "eslint frontend/js/*.js frontend/app/js/**/*.js shared/constants.js shared/*.js tests/**/*.js",
+    "lint:tokens": "node scripts/lint-tokens.js",
     "format": "prettier --write \"frontend/**/*.{html,css,js}\" \"shared/**/*.js\" \"docs/**/*.md\""
   },
   "keywords": [

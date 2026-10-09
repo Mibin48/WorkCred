@@ -5,8 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description"
-    content="WorkCred – Build a verified work history, get paid same-day, and get hired by families near you. For daily-wage workers across India." />
-  <meta name="theme-color" content="#faf7f2" />
+    content="WorkCred helps workers and families coordinate local work with verified phone numbers, start and finish codes, and a portable Work Passport." />
+  <meta name="theme-color" content="#f4f0ea" />
   <title>WorkCred – Proof of Work, Work Near You</title>
 
   <!-- PWA -->
@@ -14,15 +14,12 @@
   <link rel="icon" href="/assets/icons/workcred-icon-192.png" type="image/png" />
   <link rel="apple-touch-icon" href="/assets/icons/workcred-icon-192.png" />
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
-    rel="stylesheet" />
+  <!-- Locally hosted Latin font subsets -->
+  <link rel="preload" href="/assets/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin />
 
   <!-- Styles -->
   <link rel="stylesheet" href="/css/tokens.css" />
+  <link rel="stylesheet" href="/css/fonts.css" />
   <link rel="stylesheet" href="/css/base.css" />
   <link rel="stylesheet" href="/css/components.css" />
   <link rel="stylesheet" href="/css/landing.css" />
@@ -76,10 +73,10 @@
 
       <!-- Actions -->
       <div class="top-actions">
-        <a href="/login.html" class="btn btn-ghost" id="nav-login"
-          style="min-height:40px;padding:0 var(--space-md);font-size:var(--text-body);">Log in</a>
-        <a href="/onboard.html" class="btn btn-primary" id="nav-join"
-          style="min-height:40px;padding:0 var(--space-md);font-size:var(--text-body);display:none;">Join free</a>
+        <a href="/app/login" class="btn btn-ghost nav-login-action" id="nav-login"
+         >Log in</a>
+        <a href="/app?role=worker" class="btn btn-primary nav-join-action" id="nav-join"
+         >Join free</a>
       </div>
 
       <button class="mobile-nav-toggle" id="mobile-nav-toggle" type="button" aria-label="Open navigation menu"
@@ -98,8 +95,8 @@
       <a href="#rates" class="mobile-nav-link">Fair wages <span>03</span></a>
       <a href="#stories" class="mobile-nav-link">Stories <span>04</span></a>
       <div class="mobile-nav-actions">
-        <a href="/login.html" class="btn btn-outline">Log in</a>
-        <a href="/onboard.html?role=worker" class="btn btn-primary mobile-nav-join">Join free</a>
+        <a href="/app/login" class="btn btn-outline">Log in</a>
+        <a href="/app?role=worker" class="btn btn-primary mobile-nav-join">Join free</a>
       </div>
     </nav>
   </div>
@@ -117,7 +114,7 @@
           <!-- Copy column -->
           <div class="hero-content fade-up">
             <div>
-              <span class="eyebrow" aria-hidden="true">Trusted in 40+ cities</span>
+              <span class="eyebrow" aria-hidden="true">Built for work near you</span>
             </div>
 
             <h1 class="hero-headline" id="hero-heading">
@@ -127,12 +124,11 @@
             </h1>
 
             <p class="hero-subtext">
-              WorkCred lets you build a real work history — verified by the families you've served —
-              and get paid what you actually worked for. No contractor. No cut.
+              WorkCred helps you build a work history with verified phone numbers, start and finish codes, and a tamper-evident Work Passport. Find nearby work and agree on a fair rate before the job.
             </p>
 
             <div class="hero-actions">
-              <a href="/onboard.html?role=worker" class="btn btn-primary" id="hero-cta-worker">
+              <a href="/app?role=worker" class="btn btn-primary" id="hero-cta-worker">
                 <svg width="16" height="16" fill="none" viewBox="0 0 16 16" aria-hidden="true">
                   <path
                     d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1Zm0 1.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM8 4a.75.75 0 0 1 .75.75v3.5h2a.75.75 0 0 1 0 1.5h-2.75A.75.75 0 0 1 7.25 9V4.75A.75.75 0 0 1 8 4Z"
@@ -140,63 +136,58 @@
                 </svg>
                 Start building your record
               </a>
-              <a href="/onboard.html?role=customer" class="btn btn-outline" id="hero-cta-customer">
+              <a href="/app?role=customer" class="btn btn-outline" id="hero-cta-customer">
                 Find trusted help nearby
               </a>
             </div>
 
             <!-- Social proof -->
-            <div class="proof-banner" style="margin-top:var(--space-md);">
+            <div class="proof-banner proof-banner-spacing">
               <div class="proof-banner-inner">
                 <div class="proof-icon" aria-hidden="true">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
+                  <svg class="icon-moss" width="20" height="20" fill="none" viewBox="0 0 20 20">
                     <path
                       d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2Zm3.78 5.97-4.5 4.5a.75.75 0 0 1-1.06 0l-2-2a.75.75 0 1 1 1.06-1.06l1.47 1.47 3.97-3.97a.75.75 0 1 1 1.06 1.06Z"
-                      fill="#2a5a3b" />
+                      fill="currentColor" />
                   </svg>
                 </div>
                 <div>
-                  <div style="font-size:var(--text-body);font-weight:600;color:var(--charcoal);">14,200+ verified
-                    workers</div>
-                  <div style="font-size:var(--text-caption);color:var(--stone);margin-top:2px;">Real jobs completed.
-                    Real wages paid. Families who gave their word.</div>
+                  <div class="proof-banner-title">Your work, recorded
+                    with care</div>
+                  <div class="proof-banner-copy">A clear record of jobs and the people who stand behind them.</div>
                 </div>
               </div>
-              <div class="chip chip-moss" style="white-space:nowrap;flex-shrink:0;">
-                <span class="pulse-dot" style="width:6px;height:6px;"></span>
-                Live near you
+              <div class="chip chip-moss proof-banner-badge">
+                Free to join
               </div>
             </div>
           </div>
 
           <!-- Portrait card column -->
-          <div class="hero-portrait-card fade-up" style="transition-delay:120ms;">
-            <div style="position:relative;">
-              <img src="/assets/images/worker-electrician.jpg" alt="Ravi Kumar, Master Electrician, Pune"
+          <div class="hero-portrait-card fade-up hero-card-stagger">
+            <div class="hero-photo-wrap">
+              <img src="/assets/images/worker-electrician.jpg" alt="Illustrative electrician profile, shown at work"
                 class="hero-portrait-img" width="366" height="488" />
-              <!-- Live badge -->
-              <div class="hero-portrait-badge">
-                <span class="pulse-dot"></span>
-                Available today · Pune West
-              </div>
+              <!-- Sample badge -->
+              <div class="hero-portrait-badge">Sample profile · Pune</div>
               <!-- Overlay info -->
               <div class="hero-portrait-overlay">
                 <div class="hero-portrait-caption">
                   <div>
                     <div class="hero-portrait-name">Ravi Kumar</div>
-                    <div class="hero-portrait-meta">Master Electrician · 12 years</div>
+                    <div class="hero-portrait-meta">Electrician · sample details</div>
                     <div class="hero-portrait-stats">
                       <span>⭐ 4.9 (318 jobs)</span>
-                      <span>✓ Aadhaar verified</span>
-                      <span>📍 Shivajinagar</span>
+                      <span>✓ Sample profile</span>
+                      <span>📍 Pune</span>
                     </div>
                   </div>
                   <div class="hero-portrait-rate">
-                    <div style="font-family:var(--font-serif);font-size:1.25rem;font-weight:600;color:var(--paper);">
+                    <div class="hero-rate-value">
                       ₹750</div>
-                    <div style="font-size:var(--text-caption);color:rgba(243,239,230,0.7);">per day</div>
-                    <div style="font-size:var(--text-caption);color:#7ecf99;font-weight:600;margin-top:4px;">Paid
-                      same-day</div>
+                    <div class="hero-rate-unit">per day</div>
+                    <div class="hero-payment-note">Paid
+                      on completion</div>
                   </div>
                 </div>
               </div>
@@ -208,35 +199,18 @@
     </section>
 
     <!-- ── STATS STRIP ─────────────────────────────────────────── -->
-    <section class="stats-strip" aria-label="Platform statistics">
-      <div class="container">
-        <div class="stats-grid">
-          <div class="stat-item fade-up">
-            <div class="stat-value tnum">14,200<span style="color:var(--clay);font-size:0.6em;">+</span></div>
-            <div class="stat-label">Verified workers</div>
-            <div class="stat-sub">Across 40+ cities</div>
-          </div>
-          <div class="stat-item fade-up" style="transition-delay:80ms;">
-            <div class="stat-value tnum">₹0</div>
-            <div class="stat-label">Contractor cuts</div>
-            <div class="stat-sub">You keep every rupee you earn</div>
-          </div>
-          <div class="stat-item fade-up" style="transition-delay:160ms;">
-            <div class="stat-value tnum">4.8<span style="color:var(--clay);font-size:0.6em;"> ★</span></div>
-            <div class="stat-label">Average trust score</div>
-            <div class="stat-sub">Rated by real families</div>
-          </div>
-          <div class="stat-item fade-up" style="transition-delay:240ms;">
-            <div class="stat-value tnum">Same<span style="font-size:0.55em;color:var(--clay);"> day</span></div>
-            <div class="stat-label">Payment</div>
-            <div class="stat-sub">UPI · cash · wallet</div>
-          </div>
-        </div>
+    <section class="stats-strip" aria-label="WorkCred features">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item"><div class="stat-label">Verified phone</div><div class="stat-sub">A clear identity starting point</div></div>
+        <div class="stat-item"><div class="stat-label">Start &amp; finish codes</div><div class="stat-sub">Record when a job begins and ends</div></div>
+        <div class="stat-item"><div class="stat-label">Work Passport</div><div class="stat-sub">A tamper-evident work history</div></div>
+        <div class="stat-item"><div class="stat-label">Fair-rate guide</div><div class="stat-sub">Know the local range before you agree</div></div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ── HOW IT WORKS ─────────────────────────────────────────── -->
-    <section class="how-section" id="how-it-works" aria-labelledby="how-heading">
+  <section class="how-section" id="how-it-works" aria-labelledby="how-heading">
       <div class="container">
         <div class="how-grid">
 
@@ -245,14 +219,13 @@
             <span class="eyebrow">Simple process</span>
             <h2 class="how-sidebar-title" id="how-heading">
               From your first job<br>to a full record —<br>
-              <em style="font-style:italic;color:var(--clay);">in three steps.</em>
+              <em class="italic-accent">in three steps.</em>
             </h2>
             <div class="how-sidebar-note">
               <div
-                style="font-size:var(--text-body);font-weight:600;color:var(--charcoal);margin-bottom:var(--space-2xs);">
-                No smartphone needed to start</div>
-              <p style="font-size:var(--text-body);color:var(--stone);margin:0;">Workers can join via USSD (*123#) or
-                have a family member register on their behalf. We meet people where they are.</p>
+                class="sidebar-note-title">
+                A simple way to agree on work</div>
+              <p class="sidebar-note-copy">Start with a verified phone number. Agree on the work and rate together before the job begins.</p>
             </div>
           </div>
 
@@ -263,71 +236,51 @@
               <div class="step-num step-num-clay">1</div>
               <div class="step-body">
                 <div class="step-title">Create your free work record</div>
-                <p class="step-text">Sign up with just your phone number and Aadhaar. We don't ask for a CV. Your work
-                  history speaks for itself — starting from your very first job on WorkCred.</p>
+                <p class="step-text">Verify your phone and add a few details about the work you do. No CV is needed. Your Work Passport can start with your first recorded job.</p>
                 <div class="step-footer">
-                  <svg width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
-                    <circle cx="7" cy="7" r="6" stroke="#2a5a3b" stroke-width="1.5" />
-                    <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="#2a5a3b" stroke-width="1.5" stroke-linecap="round"
+                  <svg class="icon-moss" width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
+                    <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                       stroke-linejoin="round" />
                   </svg>
-                  Verified in under 2 minutes
+                  Verified phone number
                 </div>
               </div>
             </div>
 
-            <div class="step-card fade-up" style="transition-delay:100ms;">
+            <div class="step-card fade-up step-stagger-one">
               <div class="step-num step-num-charcoal">2</div>
               <div class="step-body">
-                <div class="step-title">Complete a job. Get a real review.</div>
-                <p class="step-text">Every family you work for rates you honestly — no stars inflated by agencies. Their
-                  name and address go on record. That's what makes your rating worth trusting.</p>
+                <div class="step-title">Meet and confirm the start code.</div>
+                <p class="step-text">Meet in person and enter the four-digit start code together. This marks when the agreed work begins.</p>
                 <div class="step-footer">
-                  <svg width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
-                    <circle cx="7" cy="7" r="6" stroke="#2a5a3b" stroke-width="1.5" />
-                    <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="#2a5a3b" stroke-width="1.5" stroke-linecap="round"
+                  <svg class="icon-moss" width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
+                    <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                       stroke-linejoin="round" />
                   </svg>
-                  Reviews by verified local families
+                  Confirm the job start together
                 </div>
               </div>
             </div>
 
-            <div class="step-card fade-up" style="transition-delay:200ms;">
+            <div class="step-card fade-up step-stagger-two">
               <div class="step-num step-num-moss">3</div>
               <div class="step-body">
-                <div class="step-title">Get paid same-day. No middleman.</div>
-                <p class="step-text">Payment goes directly from the family's phone to yours — UPI, cash confirmation, or
-                  wallet. No contractor holding your money for a week. No cut taken off the top.</p>
+                <div class="step-title">Finish, get paid cash, and record the work.</div>
+                <p class="step-text">When the work is done, the customer pays you directly in cash. Enter the finish code together and add a rating to the Work Passport.</p>
                 <div class="step-footer">
-                  <svg width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
-                    <circle cx="7" cy="7" r="6" stroke="#2a5a3b" stroke-width="1.5" />
-                    <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="#2a5a3b" stroke-width="1.5" stroke-linecap="round"
+                  <svg class="icon-moss" width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
+                    <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                       stroke-linejoin="round" />
                   </svg>
-                  Direct UPI · zero deductions
+                  Cash paid on completion
                 </div>
               </div>
             </div>
 
-            <div class="step-card fade-up"
-              style="background:var(--charcoal);border-color:var(--charcoal-soft);transition-delay:300ms;">
-              <div class="step-num step-num-neutral">4</div>
-              <div class="step-body">
-                <div class="step-title" style="color:var(--paper);">Your record grows. So does your earning.</div>
-                <p class="step-text" style="color:rgba(243,239,230,0.7);">After 10 verified jobs your WorkCred score
-                  unlocks better rates, more bookings, and access to skill training. The more you work, the more your
-                  record works for you.</p>
-                <div class="step-footer" style="color:#7ecf99;">
-                  <svg width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
-                    <circle cx="7" cy="7" r="6" stroke="#7ecf99" stroke-width="1.5" />
-                    <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="#7ecf99" stroke-width="1.5" stroke-linecap="round"
-                      stroke-linejoin="round" />
-                  </svg>
-                  Score unlocks after 10 jobs
-                </div>
-              </div>
-            </div>
+
 
           </div>
         </div>
@@ -340,44 +293,42 @@
 
         <div class="artisans-header">
           <div>
-            <span class="eyebrow eyebrow-moss">Real people, real work</span>
+            <span class="eyebrow eyebrow-moss">Sample profiles · illustrative details</span>
             <h2
-              style="font-family:var(--font-serif);font-size:var(--text-h1);font-weight:400;color:var(--charcoal);margin-top:var(--space-xs);line-height:var(--leading-snug);"
-              id="workers-heading">
-              The carpenter, the plumber,<br>the woman who keeps your home running —
+
+              id="workers-heading" class="editorial-section-title">
+              A first look at the Work Passport<br>profiles taking shape.
             </h2>
           </div>
-          <a href="/browse.html" class="btn btn-outline" style="flex-shrink:0;align-self:flex-end;">Browse all
+          <a href="/app?role=customer" class="btn btn-outline section-action-align">Find workers
             workers</a>
         </div>
 
         <div class="field-journal-grid">
           <article class="field-feature fade-up">
             <div class="field-feature-photo-wrap">
-              <img src="/assets/images/worker-plumber.jpg" alt="Rajesh Kumar, master plumber, Pune"
+              <img src="/assets/images/worker-plumber.jpg" alt="Illustrative plumber profile at work"
                 class="field-feature-photo" width="366" height="488" loading="lazy" />
               <span class="worker-location-badge field-location">📍 Shivajinagar, Pune</span>
-              <div class="field-photo-caption"><span class="eyebrow">On the record · 01</span><span
+              <div class="field-photo-caption"><span class="eyebrow">Sample profile</span><span
                   class="field-photo-role">Master Plumber · 10 years experience</span></div>
             </div>
             <div class="field-feature-body">
               <div class="field-feature-heading">
-                <h3 class="field-worker-name">Rajesh Kumar</h3><span class="field-rating">⭐ 4.9 <span>· 284
+                <h3 class="field-worker-name">Rajesh Kumar</h3><span class="field-rating">Sample · 4.9 <span>· 284
                     jobs</span></span>
               </div>
-              <blockquote class="field-feature-quote">“Rajesh fixed our entire balcony pipe assembly in one afternoon.
-                Explained everything he was doing. Showed up exactly when he said he would. We’ve called him three times
-                since.”</blockquote>
-              <p class="field-quote-byline">— Meena Patel, verified customer</p>
+                <blockquote class="field-feature-quote">Illustrative profile. Customer reviews will appear here after completed jobs.</blockquote>
+
               <div class="field-booking-footer">
-                <div class="field-price"><strong>₹700</strong><span>/ day · paid same-day</span></div><a
-                  href="/worker/rajesh-kumar" class="btn btn-primary field-book-button">Book Rajesh</a>
+                <div class="field-price"><strong>₹700</strong><span>/ day · sample rate</span></div><a
+                  href="/app?role=customer" class="btn btn-primary field-book-button">Find trusted help</a>
               </div>
             </div>
           </article>
 
           <div class="field-notes" aria-label="More workers from the field journal">
-            <article class="field-note fade-up" style="transition-delay:120ms;">
+            <article class="field-note fade-up profile-stagger-one">
               <img src="/assets/images/worker-electrician.jpg" alt="Ravi Kumar, electrician, Pune"
                 class="field-note-photo" width="366" height="488" loading="lazy" />
               <div class="field-note-body">
@@ -385,17 +336,16 @@
                   <div>
                     <h3 class="field-worker-name">Ravi Kumar</h3>
                     <p class="field-note-role">Electrician · 12 years</p>
-                  </div><span class="field-rating">⭐ 4.9 <span>· 318 jobs</span></span>
+                  </div><span class="field-rating">Sample · 4.9 <span>· 318 jobs</span></span>
                 </div>
                 <span class="field-note-location">Kothrud, Pune</span>
-                <blockquote class="field-note-quote">“He rewired our entire house switchboard cleanly and safely.”
+                <blockquote class="field-note-quote">Illustrative worker profile. Reviews will be shown after completed jobs.
                 </blockquote>
-                <div class="field-note-footer"><strong>₹750 <span>/ day</span></strong><a href="/worker/ravi-kumar">View
-                    Ravi’s record <span aria-hidden="true">→</span></a></div>
+                <div class="field-note-footer"><strong>₹750 <span>/ day · sample</span></strong><a href="/app?role=worker">Build a work record <span aria-hidden="true">→</span></a></div>
               </div>
             </article>
 
-            <article class="field-note field-note-offset fade-up" style="transition-delay:220ms;">
+            <article class="field-note field-note-offset fade-up profile-stagger-two">
               <img src="/assets/images/worker-painter.jpg" alt="Lakshmi Devi, painter, Chennai" class="field-note-photo"
                 width="366" height="488" loading="lazy" />
               <div class="field-note-body">
@@ -403,30 +353,30 @@
                   <div>
                     <h3 class="field-worker-name">Lakshmi Devi</h3>
                     <p class="field-note-role">Interior Painter · 9 years</p>
-                  </div><span class="field-rating">⭐ 4.9 <span>· 215 jobs</span></span>
+                  </div><span class="field-rating">Sample · 4.9 <span>· 215 jobs</span></span>
                 </div>
                 <span class="field-note-location">Velachery, Chennai</span>
-                <blockquote class="field-note-quote">“Painted our 3BHK flat in 3 days. Clean borders, zero mess.”
+                <blockquote class="field-note-quote">Illustrative worker profile. Reviews will be shown after completed jobs.
                 </blockquote>
-                <div class="field-note-footer"><strong>₹650 <span>/ day</span></strong><a
-                    href="/worker/lakshmi-devi">View Lakshmi’s record <span aria-hidden="true">→</span></a></div>
+                <div class="field-note-footer"><strong>₹650 <span>/ day · sample</span></strong><a
+                    href="/app?role=worker">Build a work record <span aria-hidden="true">→</span></a></div>
               </div>
             </article>
 
-            <article class="field-note field-note-new fade-up" style="transition-delay:300ms;">
+            <article class="field-note field-note-new fade-up profile-stagger-three">
               <img src="/assets/images/worker-plumber-journal.webp" alt="Plumber repairing a pipe beneath a sink"
                 class="field-note-photo" width="1200" height="896" loading="lazy" />
               <div class="field-note-body">
                 <div class="field-note-heading">
                   <div>
-                    <h3 class="field-worker-name">Rajiv Malhotra</h3>
-                    <p class="field-note-role">New to the field journal</p>
+                    <h3 class="field-worker-name">Plumber</h3>
+                    <p class="field-note-role">New profile · sample image</p>
                   </div>
                 </div>
-                <span class="field-note-location">At work</span>
+                <span class="field-note-location">Location not provided</span>
                 <p class="field-note-quote field-note-description">Careful hands on a pipe repair beneath the sink.</p>
                 <div class="field-note-footer"><span class="field-new-profile">Profile details coming soon</span><a
-                    href="/browse.html">Browse workers <span aria-hidden="true">→</span></a></div>
+                  href="/app?role=customer">Find workers <span aria-hidden="true">→</span></a></div>
               </div>
             </article>
           </div>
@@ -440,20 +390,17 @@
         <div class="rates-grid">
 
           <!-- Copy -->
-          <div style="display:flex;flex-direction:column;gap:var(--space-md);">
+          <div class="rates-copy-stack">
             <span class="eyebrow">Fair wage compass</span>
             <h2
-              style="font-family:var(--font-serif);font-size:var(--text-h1);font-weight:400;color:var(--charcoal);line-height:var(--leading-snug);"
-              id="rates-heading">
+
+              id="rates-heading" class="rates-editorial-title">
               Know what your<br>work is actually<br>
-              <em style="font-style:italic;color:var(--clay);">worth.</em>
+              <em class="italic-accent">worth.</em>
             </h2>
-            <p>Contractors often pay workers far below market rate and charge clients a premium. WorkCred publishes the
-              real local rates — so workers get paid fairly and families don't overpay.</p>
-            <p style="font-size:var(--text-body);color:var(--stone);">All rates are crowdsourced from verified completed
-              jobs in your city, updated weekly.</p>
-            <a href="/rates.html" class="btn btn-outline" style="align-self:flex-start;margin-top:var(--space-xs);">See
-              rates in your city</a>
+            <p>WorkCred is building a fair-rate guide to help workers and families discuss pay before work begins.</p>
+            <p class="rates-copy-note">These example ranges are illustrative only. Agree on the final rate together before work starts.</p>
+            <a href="#rates" class="btn btn-outline rates-action-align">See sample ranges</a>
           </div>
 
           <!-- Rates table -->
@@ -461,14 +408,12 @@
             <div class="rates-table-header">
               <div>
                 <div
-                  style="font-family:var(--font-serif);font-size:var(--text-h4);font-weight:600;color:var(--charcoal);">
-                  Pune · Daily rates</div>
-                <div style="font-size:var(--text-caption);color:var(--stone);">Updated 3 days ago · 840 verified jobs
-                </div>
+                  class="rates-table-title">
+                  Sample daily rates · Pune</div>
+                <div class="rates-table-subtitle">Illustrative ranges, not live local data</div>
               </div>
-              <span class="chip chip-moss" style="flex-shrink:0;">
-                <span class="pulse-dot" style="width:6px;height:6px;"></span>
-                Live data
+              <span class="chip chip-moss rates-chip-align">
+                Sample data
               </span>
             </div>
 
@@ -479,7 +424,7 @@
               </div>
               <div>
                 <div class="rates-amount tnum">₹650 – ₹900</div>
-                <span class="rates-paid">Direct UPI</span>
+                <span class="rates-paid">Agree before work</span>
               </div>
             </div>
             <div class="rates-row">
@@ -489,7 +434,7 @@
               </div>
               <div>
                 <div class="rates-amount tnum">₹550 – ₹800</div>
-                <span class="rates-paid">Direct UPI</span>
+                <span class="rates-paid">Agree before work</span>
               </div>
             </div>
             <div class="rates-row">
@@ -499,7 +444,7 @@
               </div>
               <div>
                 <div class="rates-amount tnum">₹450 – ₹700</div>
-                <span class="rates-paid">Direct UPI</span>
+                <span class="rates-paid">Agree before work</span>
               </div>
             </div>
             <div class="rates-row">
@@ -509,7 +454,7 @@
               </div>
               <div>
                 <div class="rates-amount tnum">₹700 – ₹1,100</div>
-                <span class="rates-paid">Direct UPI</span>
+                <span class="rates-paid">Agree before work</span>
               </div>
             </div>
             <div class="rates-row">
@@ -519,13 +464,13 @@
               </div>
               <div>
                 <div class="rates-amount tnum">₹600 – ₹850</div>
-                <span class="rates-paid">Direct UPI</span>
+                <span class="rates-paid">Agree before work</span>
               </div>
             </div>
 
             <div class="rates-note">
-              <span>These are fair-market ranges, not our fees.</span>
-              <span style="font-weight:600;color:var(--charcoal);">WorkCred charges nothing.</span>
+              <span>Illustrative only; agree on the rate together.</span>
+              <span class="rates-note-emphasis">WorkCred charges nothing.</span>
             </div>
           </div>
 
@@ -538,14 +483,14 @@
       <div class="container">
 
         <div class="manifesto-tag" aria-hidden="true">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-            <circle cx="6" cy="6" r="5" fill="#c85a32" />
+          <svg class="icon-clay" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <circle cx="6" cy="6" r="5" fill="currentColor" />
           </svg>
           Our belief
         </div>
 
         <h2 class="manifesto-headline" id="manifesto-heading">
-          The carpenter who built your bookshelf has sixteen years of skill. He shouldn't need a middleman to prove it.
+          A carpenter’s skill is built over years. Their work record should be theirs to carry.
         </h2>
 
         <div class="manifesto-body-grid">
@@ -554,8 +499,7 @@
             the cook, the painter. The family who trusts them. Everyone drinks from the same honest record.
           </p>
           <p>
-            When a worker's reviews come from real, named families with real addresses — that's accountability on both
-            sides. That's what makes a WorkCred score worth something.
+            As people use WorkCred, a worker’s completed jobs and the feedback they receive can build a record over time.
           </p>
         </div>
 
@@ -569,14 +513,14 @@
               </svg>
             </div>
             <div>
-              <div style="font-family:var(--font-serif);font-size:var(--text-h4);font-weight:600;color:var(--paper);">A
+              <div class="manifesto-callout-title">A
                 platform, not a contractor</div>
-              <div style="font-size:var(--text-body);color:rgba(243,239,230,0.65);margin-top:4px;">We don't take a cut.
+              <div class="manifesto-callout-copy">We don't take a cut.
                 We don't control your schedule. We just keep the record.</div>
             </div>
           </div>
-          <a href="/about.html" class="btn"
-            style="background:rgba(255,255,255,0.1);color:var(--linen);border:1px solid rgba(255,255,255,0.18);min-height:44px;">
+          <a href="/about.html" class="btn manifesto-story-action"
+           >
             Read our full story
           </a>
         </div>
@@ -591,74 +535,18 @@
           <div>
             <span class="eyebrow">From the neighbourhood</span>
             <h2
-              style="font-family:var(--font-serif);font-size:var(--text-h1);font-weight:400;color:var(--charcoal);margin-top:var(--space-xs);line-height:var(--leading-snug);"
-              id="stories-heading">
+
+              id="stories-heading" class="editorial-section-title">
               What families &amp;<br>workers are saying
             </h2>
           </div>
         </div>
 
-        <div class="stories-grid">
-
-          <div class="story-card fade-up">
-            <p class="story-quote">"I used to wait two weeks to get paid. My contractor would deduct ₹200 'for admin'.
-              Now the money reaches my account the same evening. My wife can plan the week's groceries."</p>
-            <div class="story-footer">
-              <div>
-                <div class="story-author">Ramesh Yadav</div>
-                <div class="story-author-sub">Plumber · Bhopal · 6 years on WorkCred</div>
-              </div>
-              <div class="story-verified" title="Verified worker">
-                <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
-                  <path
-                    d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm3.28 4.97-3.75 3.75a.75.75 0 0 1-1.06 0l-1.75-1.75a.75.75 0 1 1 1.06-1.06l1.22 1.22 3.22-3.22a.75.75 0 1 1 1.06 1.06Z"
-                    fill="#2a5a3b" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div class="story-card fade-up" style="transition-delay:100ms;">
-            <p class="story-quote">"Finding a reliable painter used to mean asking every neighbour and still gambling.
-              Seeing Deepak's 200+ verified jobs with names attached — that was enough. He came on time, delivered
-              perfectly."</p>
-            <div class="story-footer">
-              <div>
-                <div class="story-author">Priya Nair</div>
-                <div class="story-author-sub">Customer · Kochi · 14 bookings</div>
-              </div>
-              <div class="story-verified" title="Verified customer">
-                <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
-                  <path
-                    d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm3.28 4.97-3.75 3.75a.75.75 0 0 1-1.06 0l-1.75-1.75a.75.75 0 1 1 1.06-1.06l1.22 1.22 3.22-3.22a.75.75 0 1 1 1.06 1.06Z"
-                    fill="#2a5a3b" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div class="story-card fade-up"
-            style="background:var(--charcoal);border-color:var(--charcoal-soft);transition-delay:200ms;">
-            <p class="story-quote" style="color:rgba(250,247,242,0.9);">"My WorkCred record is the first official
-              document that says I'm good at what I do. After 14 years of carpentry — someone finally wrote it down."
-            </p>
-            <div class="story-footer" style="border-top-color:rgba(255,255,255,0.12);">
-              <div>
-                <div class="story-author" style="color:var(--paper);">Manoj Singh</div>
-                <div class="story-author-sub" style="color:rgba(243,239,230,0.6);">Carpenter · Mumbai · 407 verified
-                  jobs</div>
-              </div>
-              <div class="story-verified" style="background:rgba(255,255,255,0.1);" title="Verified worker">
-                <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
-                  <path
-                    d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm3.28 4.97-3.75 3.75a.75.75 0 0 1-1.06 0l-1.75-1.75a.75.75 0 1 1 1.06-1.06l1.22 1.22 3.22-3.22a.75.75 0 1 1 1.06 1.06Z"
-                    fill="#7ecf99" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-        </div>
+        <div class="stories-early-access">
+        <span class="stories-note-mark" aria-hidden="true">✳</span>
+        <div><h3>Early access is opening.</h3><p>Join the first workers and families in your city. We’ll share stories here when there are real experiences to tell.</p></div>
+        <a href="/app?role=worker" class="btn btn-primary">Join the first workers</a>
+      </div>
       </div>
     </section>
 
@@ -667,57 +555,56 @@
       <div class="container">
         <div class="cta-card">
           <div class="cta-icon" aria-hidden="true">
-            <svg width="28" height="28" fill="none" viewBox="0 0 28 28">
+            <svg class="icon-paper" width="28" height="28" fill="none" viewBox="0 0 28 28">
               <path
                 d="M14 2C7.373 2 2 7.373 2 14s5.373 12 12 12 12-5.373 12-12S20.627 2 14 2Zm5.78 8.97-6.5 6.5a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 1 1 1.06-1.06l2.47 2.47 5.97-5.97a.75.75 0 1 1 1.06 1.06Z"
-                fill="#faf7f2" />
+                fill="currentColor" />
             </svg>
           </div>
-          <h2 class="cta-title"
-            style="font-family:var(--font-serif);font-size:var(--text-h1);font-weight:400;line-height:var(--leading-snug);color:var(--charcoal);"
+          <h2 class="cta-title cta-editorial-title"
+
             id="cta-heading">
-            Your work record starts<br>with your first job.
+            Start with a phone number.<br>Build your Work Passport.
           </h2>
-          <p class="cta-subtext" style="color:var(--stone);">Join 14,200+ workers who have built a verified record and
-            get hired by families in your neighbourhood — no contractor, no cut.</p>
+          <p class="cta-subtext cta-editorial-copy">Join free. Verify your phone, agree on a fair rate, and record work with start and finish codes.</p>
           <div class="cta-buttons">
-            <a href="/onboard.html?role=worker" class="btn btn-primary" id="cta-worker"
-              style="flex:1;max-width:240px;">I'm a worker — join free</a>
-            <a href="/onboard.html?role=customer" class="btn btn-outline" id="cta-customer"
-              style="flex:1;max-width:240px;">I need trusted help</a>
+            <a href="/app?role=worker" class="btn btn-primary cta-action-flex" id="cta-worker"
+             >I'm a worker — join free</a>
+            <a href="/app?role=customer" class="btn btn-outline cta-action-flex" id="cta-customer"
+             >I need trusted help</a>
           </div>
           <div class="cta-assurances">
             <span class="assurance-item">
-              <svg width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
-                <circle cx="7" cy="7" r="6" fill="#e2efe6" />
-                <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="#2a5a3b" stroke-width="1.5" stroke-linecap="round"
+              <svg class="icon-moss icon-moss-tint" width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
+                <circle cx="7" cy="7" r="6" fill="currentColor" />
+                <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                   stroke-linejoin="round" />
               </svg>
-              Free forever for workers
+              Free to join
             </span>
             <span class="assurance-item">
-              <svg width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
-                <circle cx="7" cy="7" r="6" fill="#e2efe6" />
-                <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="#2a5a3b" stroke-width="1.5" stroke-linecap="round"
+              <svg class="icon-moss icon-moss-tint" width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
+                <circle cx="7" cy="7" r="6" fill="currentColor" />
+                <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                   stroke-linejoin="round" />
               </svg>
-              No contractor cuts
+              Fair rates agreed up front
             </span>
             <span class="assurance-item">
-              <svg width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
-                <circle cx="7" cy="7" r="6" fill="#e2efe6" />
-                <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="#2a5a3b" stroke-width="1.5" stroke-linecap="round"
+              <svg class="icon-moss icon-moss-tint" width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
+                <circle cx="7" cy="7" r="6" fill="currentColor" />
+                <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                   stroke-linejoin="round" />
               </svg>
-              Aadhaar-verified trust
+              Verified phone number
             </span>
             <span class="assurance-item">
-              <svg width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
-                <circle cx="7" cy="7" r="6" fill="#e2efe6" />
-                <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="#2a5a3b" stroke-width="1.5" stroke-linecap="round"
+              <svg class="icon-moss icon-moss-tint" width="14" height="14" fill="none" viewBox="0 0 14 14" aria-hidden="true">
+                <circle cx="7" cy="7" r="6" fill="currentColor" />
+                <path d="M4.5 7.5 6.5 9.5 9.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                   stroke-linejoin="round" />
               </svg>
-              Same-day payment
+              Cash paid on completion
             </span>
           </div>
         </div>
@@ -739,9 +626,8 @@
             <img class="brand-wordmark" src="/assets/workcred-wordmark.png" alt="" aria-hidden="true" width="140"
               height="108" />
           </a>
-          <p class="footer-brand-desc">A platform for daily-wage workers to build a verified work history and get hired
-            by families in their neighbourhood. No contractor. No cut.</p>
-          <div style="display:flex;gap:var(--space-xs);flex-wrap:wrap;">
+          <p class="footer-brand-desc">A local work record for workers and families. Proof of work, work near you.</p>
+          <div class="footer-social-list">
             <span class="chip chip-neutral">Made in India</span>
             <span class="chip chip-moss">Open &amp; transparent</span>
           </div>
@@ -750,17 +636,17 @@
         <!-- For workers -->
         <div class="footer-links-group">
           <div class="footer-group-title">For workers</div>
-          <a href="/onboard.html?role=worker" class="footer-link">Create your record</a>
-          <a href="/rates.html" class="footer-link">Fair wage guide</a>
+          <a href="/app?role=worker" class="footer-link">Create your record</a>
+          <a href="#rates" class="footer-link">Fair wage guide</a>
           <a href="/training.html" class="footer-link">Skill training</a>
-          <a href="/workers/ussd.html" class="footer-link">Join via USSD</a>
+          <a href="#how-it-works" class="footer-link">How WorkCred works</a>
         </div>
 
         <!-- For families -->
         <div class="footer-links-group">
           <div class="footer-group-title">For families</div>
-          <a href="/browse.html" class="footer-link">Find workers nearby</a>
-          <a href="/how-ratings-work.html" class="footer-link">How ratings work</a>
+          <a href="/app?role=customer" class="footer-link">Find workers nearby</a>
+          <a href="#stories" class="footer-link">How ratings work</a>
           <a href="/payment.html" class="footer-link">Payment &amp; safety</a>
           <a href="/post-job.html" class="footer-link">Post a job</a>
         </div>
@@ -768,7 +654,7 @@
         <!-- Company -->
         <div class="footer-links-group">
           <div class="footer-group-title">WorkCred</div>
-          <a href="/about.html" class="footer-link">Our story</a>
+          <a href="#manifesto-heading" class="footer-link">Our story</a>
           <a href="/blog.html" class="footer-link">Field notes</a>
           <a href="/press.html" class="footer-link">Press</a>
           <a href="/contact.html" class="footer-link">Contact</a>
@@ -777,7 +663,7 @@
       </div>
 
       <div class="footer-bottom">
-        <div>© 2025 WorkCred Technologies Pvt. Ltd.</div>
+        <div>© 2026 WorkCred</div>
         <div class="footer-legal">
           <a href="/privacy.html" class="footer-link">Privacy</a>
           <a href="/terms.html" class="footer-link">Terms</a>
@@ -791,78 +677,14 @@
      STICKY MOBILE CTA
      ============================================================ -->
   <div class="sticky-mobile-cta" aria-label="Quick actions">
-    <a href="/onboard.html?role=worker" class="btn btn-primary" id="sticky-worker">I'm a worker</a>
-    <a href="/onboard.html?role=customer" class="btn btn-outline" id="sticky-customer">Find help</a>
+    <a href="/app?role=worker" class="btn btn-primary" id="sticky-worker">I'm a worker</a>
+    <a href="/app?role=customer" class="btn btn-outline" id="sticky-customer">Find help</a>
   </div>
 
   <!-- ============================================================
      SCRIPTS
      ============================================================ -->
-  <script type="module">
-    // ── Preloader ──────────────────────────────────────────────────
-    const preloader = document.getElementById('preloader');
-    const counter = document.getElementById('preloader-counter');
-    const skipBtn = document.getElementById('preloader-skip');
-
-    function hidePreloader() {
-      preloader.classList.add('is-hidden');
-    }
-
-    skipBtn.addEventListener('click', hidePreloader);
-
-    let count = 0;
-    const interval = setInterval(() => {
-      count += Math.ceil(Math.random() * 18);
-      if (count >= 100) { count = 100; clearInterval(interval); setTimeout(hidePreloader, 350); }
-      counter.textContent = count;
-    }, 60);
-
-    // ── Scroll-reveal (.fade-up) ───────────────────────────────────
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
-
-    // ── Show "Join free" button in desktop nav on scroll ──────────
-    const navJoin = document.getElementById('nav-join');
-    const scrollWatcher = new IntersectionObserver(
-      ([entry]) => { navJoin.style.display = entry.isIntersecting ? 'none' : 'inline-flex'; },
-      { threshold: 0 }
-    );
-    scrollWatcher.observe(document.querySelector('.hero-section'));
-
-    // ── Mobile navigation drawer ────────────────────────────────
-    const mobileNavToggle = document.getElementById('mobile-nav-toggle');
-    const mobileNavPanel = document.getElementById('mobile-navigation');
-    const mobileNavLinks = mobileNavPanel.querySelectorAll('a');
-
-    function setMobileNavOpen(isOpen, restoreFocus = true) {
-      mobileNavToggle.setAttribute('aria-expanded', String(isOpen));
-      mobileNavToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
-      mobileNavPanel.setAttribute('aria-hidden', String(!isOpen));
-      mobileNavPanel.classList.toggle('is-open', isOpen);
-      document.body.classList.toggle('nav-open', isOpen);
-      if (isOpen) mobileNavLinks[0].focus();
-      else if (restoreFocus) mobileNavToggle.focus();
-    }
-
-    mobileNavToggle.addEventListener('click', () => {
-      setMobileNavOpen(mobileNavToggle.getAttribute('aria-expanded') !== 'true');
-    });
-    mobileNavPanel.addEventListener('click', event => {
-      if (event.target === mobileNavPanel) setMobileNavOpen(false);
-    });
-    mobileNavLinks.forEach(link => link.addEventListener('click', () => setMobileNavOpen(false)));
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && mobileNavToggle.getAttribute('aria-expanded') === 'true') {
-        setMobileNavOpen(false);
-      }
-    });
-    window.matchMedia('(min-width: 768px)').addEventListener('change', event => {
-      if (event.matches && mobileNavToggle.getAttribute('aria-expanded') === 'true') setMobileNavOpen(false, false);
-    });
-
-  </script>
+  <script type="module" src="/js/landing.js"></script>
 
 </body>
 

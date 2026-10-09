@@ -1,93 +1,70 @@
-/**
- * WorkCred Landing Page Controller
- * Handles preloader, interactive filter chips, and motion initialization.
- */
-
 import { initMotion } from './motion.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.documentElement.classList.add('has-js');
+const initialize = () => {
   setupPreloader();
   setupRadarFilter();
+  setupNavigation();
   initMotion();
-});
+};
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialize, { once: true });
+else initialize();
 
-/**
- * Preloader: Under 1.2s, skippable, runs once per session
- */
 function setupPreloader() {
   const preloader = document.getElementById('preloader');
-  const counterEl = document.getElementById('preloader-counter');
-  const skipBtn = document.getElementById('preloader-skip-btn');
-
   if (!preloader) return;
-
-  const hasVisited = sessionStorage.getItem('workcred_visited');
-  if (hasVisited) {
-    preloader.classList.add('is-hidden');
-    return;
-  }
-
+  const hide = () => preloader.classList.add('is-hidden');
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { hide(); return; }
+  if (sessionStorage.getItem('workcred_visited')) { hide(); return; }
   let count = 0;
-  let isDismissed = false;
-
-  function dismiss() {
-    if (isDismissed) return;
-    isDismissed = true;
+  const counter = document.getElementById('preloader-counter');
+  const timer = setInterval(() => {
+    count = Math.min(100, count + 11);
+    if (counter) counter.textContent = String(count).padStart(2, '0');
+    if (count === 100) clearInterval(timer);
+  }, 60);
+  const finish = () => {
+    clearInterval(timer);
     sessionStorage.setItem('workcred_visited', '1');
-    preloader.classList.add('is-hidden');
-  }
-
-  // Counter loop: 00 to 100 over ~900ms
-  const interval = setInterval(() => {
-    count += 5;
-    if (counterEl) {
-      counterEl.textContent = count < 10 ? `0${count}` : `${Math.min(count, 100)}`;
-    }
-    if (count >= 100) {
-      clearInterval(interval);
-      setTimeout(dismiss, 150);
-    }
-  }, 45);
-
-  // Esc key or Skip button
-  if (skipBtn) {
-    skipBtn.addEventListener('click', () => {
-      clearInterval(interval);
-      dismiss();
-    });
-  }
-
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      clearInterval(interval);
-      dismiss();
-    }
-  });
-
-  // Safety timeout: always dismiss by 1.2s
-  setTimeout(() => {
-    clearInterval(interval);
-    dismiss();
-  }, 1200);
+    hide();
+  };
+  document.getElementById('preloader-skip')?.addEventListener('click', finish, { once: true });
+  window.addEventListener('keydown', (event) => { if (event.key === 'Escape') finish(); }, { once: true });
+  window.setTimeout(finish, 750);
 }
 
-/**
- * Radar Filter Chips Interaction
- */
 function setupRadarFilter() {
-  const chips = document.querySelectorAll(
-    '[role="group"][aria-label="Available slot duration"] button'
-  );
-  chips.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      chips.forEach((c) => {
-        c.classList.remove('chip-dark');
-        c.classList.add('chip-neutral');
-        c.setAttribute('aria-pressed', 'false');
-      });
-      btn.classList.remove('chip-neutral');
-      btn.classList.add('chip-dark');
-      btn.setAttribute('aria-pressed', 'true');
-    });
-  });
+  const chips = document.querySelectorAll('[role="group"][aria-label="Available slot duration"] button');
+  chips.forEach((button) => button.addEventListener('click', () => {
+    chips.forEach((chip) => { chip.classList.remove('chip-dark'); chip.classList.add('chip-neutral'); chip.setAttribute('aria-pressed', 'false'); });
+    button.classList.remove('chip-neutral'); button.classList.add('chip-dark'); button.setAttribute('aria-pressed', 'true');
+  }));
+}
+
+function setupNavigation() {
+  const toggle = document.getElementById('mobile-nav-toggle');
+  const panel = document.getElementById('mobile-navigation');
+  if (!toggle || !panel) return;
+  const links = panel.querySelectorAll('a');
+  const setOpen = (open, restoreFocus = true) => {
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu');
+    panel.setAttribute('aria-hidden', String(!open));
+    panel.classList.toggle('is-open', open);
+    document.body.classList.toggle('nav-open', open);
+    if (open) links[0]?.focus(); else if (restoreFocus) toggle.focus();
+  };
+  toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+  panel.addEventListener('click', (event) => { if (event.target === panel) setOpen(false); });
+  links.forEach((link) => link.addEventListener('click', () => setOpen(false, false)));
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') setOpen(false); });
+  window.matchMedia('(min-width: 768px)').addEventListener('change', (event) => { if (event.matches && toggle.getAttribute('aria-expanded') === 'true') setOpen(false, false); });
+  const join = document.getElementById('nav-join');
+  const hero = document.querySelector('.hero-section');
+  if (join && hero && 'IntersectionObserver' in window) {
+    try {
+      const observer = new IntersectionObserver(([entry]) => join.classList.toggle('is-visible', !entry.isIntersecting));
+      observer.observe(hero);
+    } catch { /* Keep the join action visible if observation is unavailable. */ }
+  }
 }
