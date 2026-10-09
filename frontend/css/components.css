@@ -127,13 +127,13 @@
   line-height: 1;
 }
 
-.chip-clay { background-color: var(--clay-tint); color: var(--clay); border-color: #eccdc0; }
-.chip-moss { background-color: var(--moss-tint); color: var(--moss); border-color: #b8dac2; }
-.chip-ochre { background-color: var(--ochre-tint); color: var(--ochre); border-color: #f0deb4; }
+.chip-clay { background-color: var(--clay-tint); color: var(--clay); border-color: var(--clay-border); }
+.chip-moss { background-color: var(--moss-tint); color: var(--moss); border-color: var(--moss-border); }
+.chip-ochre { background-color: var(--ochre-tint); color: var(--ochre); border-color: var(--ochre-border); }
 .chip-neutral { background-color: var(--linen); color: var(--stone); border-color: var(--border); }
 .chip-dark { background-color: var(--charcoal); color: var(--paper); border-color: var(--charcoal); }
 .chip-paper { background-color: var(--paper); color: var(--charcoal); border-color: var(--border); }
-.chip-green { background-color: var(--moss-tint); color: var(--moss); border-color: #b8dac2; }
+.chip-green { background-color: var(--moss-tint); color: var(--moss); border-color: var(--moss-border); }
 
 .chip-interactive {
   min-height: 36px;
@@ -273,7 +273,7 @@
 }
 .brand-name {
   font-family: var(--font-serif);
-  font-size: 1.375rem;
+  font-size: var(--text-brand);
   font-weight: 600;
   color: var(--charcoal);
   letter-spacing: -0.02em;
@@ -354,7 +354,7 @@
     display: block;
     overflow-y: auto;
     padding: calc(100px + env(safe-area-inset-top, 0px)) var(--space-lg) calc(var(--space-2xl) + env(safe-area-inset-bottom, 0px));
-    background: #f4f0ea;
+    background: var(--cream);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;

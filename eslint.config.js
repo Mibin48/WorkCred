@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['frontend/js/landing.js', 'frontend/js/motion.js', 'shared/**/*.js', 'scripts/**/*.js'],
+    files: ['frontend/js/**/*.js', 'frontend/app/js/**/*.js', 'shared/**/*.js', 'scripts/**/*.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',

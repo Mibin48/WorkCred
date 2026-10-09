@@ -1,0 +1,29 @@
+@import url('../../css/tokens.css');
+@import url('../../css/fonts.css');
+@import url('./components.css');
+@import url('./layouts.css');
+
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+html { min-width: 0; background: var(--linen); scroll-behavior: smooth; }
+body { margin: 0; color: var(--charcoal); font: 400 var(--text-body) / var(--leading-normal) var(--font-sans); }
+button, input, select { font: inherit; }
+button, a, input, select, summary { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+  outline: 3px solid var(--clay); outline-offset: 3px;
+}
+.wc-visually-hidden, .wc-live-region:not(:has(*)) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.wc-skip-link { position: fixed; z-index: var(--z-skip-link); left: var(--space-md); top: var(--space-md); padding: var(--space-xs) var(--space-md); transform: translateY(-180%); border-radius: var(--radius-pill); background: var(--charcoal); color: var(--paper); }
+.wc-skip-link:focus { transform: translateY(0); }
+.wc-live-region { position: fixed; z-index: var(--z-mobile-cta); right: var(--space-md); bottom: calc(6.25rem + env(safe-area-inset-bottom)); max-width: min(26rem, calc(100vw - 2rem)); }
+.wc-app { min-height: 100dvh; }
+.wc-dev-menu { position: fixed; z-index: var(--z-header); right: var(--space-sm); bottom: calc(6rem + env(safe-area-inset-bottom)); border: var(--border-width) solid var(--border); border-radius: var(--radius-card); padding: var(--space-xs); background: var(--surface); box-shadow: var(--shadow-md); }
+.wc-dev-menu summary { min-height: 2.75rem; padding: var(--space-xs) var(--space-sm); cursor: pointer; }
+.wc-reduced-motion, * { scroll-behavior: auto; }
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+  .wc-app-view { animation: wc-view-in var(--duration-normal) var(--ease-spring) both; }
+  @keyframes wc-view-in { from { opacity: 0; transform: translateY(var(--space-xs)); } to { opacity: 1; transform: translateY(0); } }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
