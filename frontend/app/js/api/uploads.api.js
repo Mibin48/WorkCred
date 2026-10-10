@@ -22,7 +22,31 @@ export const uploadsApi = {
       }
 
       const reader = new FileReader();
-      reader.onload = (e) => resolve({ dataUrl: e.target.result });
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 1280;
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/webp', 0.85);
+          resolve({ dataUrl: compressed, width, height });
+        };
+        img.onerror = () => reject(new Error('Failed to parse image for compression.'));
+        img.src = e.target.result;
+      };
       reader.onerror = () => reject(new Error('Failed to read image file.'));
       reader.readAsDataURL(file);
     });

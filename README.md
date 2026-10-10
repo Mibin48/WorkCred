@@ -25,17 +25,37 @@ The application will be live at **http://localhost:3000** (or `http://127.0.0.1:
 
 ### Additional Scripts
 ```bash
+# Run complete test suite (unit tests, cryptographic verification, service e2e)
+npm test
+
+# Check for stray hex colors and font-size token adherence
+npm run lint:tokens
+
 # Run ESLint across authored code
 npm run lint
 
 # Format code with Prettier
 npm run format
-
-# Re-copy ESM vendor distributions (GSAP, ScrollTrigger, Lenis)
-npm run vendor
 ```
 
 ---
+
+## 2. Demo Accounts & Phase A Testing
+
+| Role | Name | Phone | OTP | Initial URL |
+| :--- | :--- | :--- | :--- | :--- |
+| **Worker** | Ravi Kumar | `9000000001` | `123456` | `http://localhost:3000/app/#/login` |
+| **Customer** | Meera Nair | `9000000002` | `123456` | `http://localhost:3000/app/#/login` |
+
+### Developer Tools (`?dev=1`)
+Append `?dev=1` to any `/app` URL (e.g., `http://localhost:3000/app/?dev=1#/c/find`) to open the floating **Developer Inspector Drawer**:
+- **Data Viewer**: Inspect active IndexedDB/mock collections (`users`, `bookings`, `passportEntries`, `availability`, `posts`, `follows`).
+- **Requests Log**: Realtime monitoring of API calls, latency simulation, and HTTP statuses.
+- **Controls**: Reset seed data, simulate cryptographic ledger tampering (`/dev/tamper-passport`), time travel (+4 hours), emit realtime socket events (`radar:worker_free`, `job:new`), and unregister Service Workers.
+- **Session Switcher**: Instant one-tap switching between Ravi (worker) and Meera (customer).
+
+---
+
 
 ## 2. Monorepo Architecture
 

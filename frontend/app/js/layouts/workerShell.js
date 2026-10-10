@@ -12,5 +12,7 @@ const tabs = [
 ];
 
 export function workerShell({ title, active, content, navigate, user }) {
-  return h('div', { className: 'wc-shell' }, OfflineBanner(), TopBar({ title, location: user.city }), h('main', { className: 'wc-page-content' }, content), TabBar({ items: tabs, active, onNavigate: navigate }));
+  const feedBtn = h('a', { className: 'wc-topbar-icon-btn', href: '#/feed', 'aria-label': en.feed.title, title: en.feed.title, onClick: (e) => { e.preventDefault(); navigate('/feed'); } }, '📰');
+  return h('div', { className: 'wc-shell' }, OfflineBanner(), TopBar({ title, location: user.city, actions: feedBtn }), h('main', { className: 'wc-page-content' }, content), TabBar({ items: tabs, active, onNavigate: navigate }));
 }
+

@@ -1,0 +1,88 @@
+/* WorkCred Print Stylesheet (A6 / ID-Card format) */
+@media print {
+  @page {
+    size: A6 portrait;
+    margin: 8mm;
+  }
+
+  /* Reset & hide interactive chrome */
+  body {
+    background: var(--surface) !important;
+    color: var(--charcoal) !important;
+    font-size: var(--text-body) !important;
+  }
+
+  .wc-tabbar,
+  .wc-app-topbar,
+  .wc-public-header,
+  .wc-public-footer,
+  .wc-public-sticky-cta,
+  .wc-public-link-bar,
+  .wc-passport-actions,
+  .wc-public-page-actions,
+  .wc-timeline-section,
+  .wc-public-timeline-section,
+  .wc-receipt-actions,
+  .wc-dev-drawer,
+  .wc-text-back,
+  .wc-button {
+    display: none !important;
+  }
+
+  /* Format Card for Print */
+  .wc-passport-card {
+    border: 1px solid var(--border-strong) !important;
+    background: var(--surface) !important;
+    color: var(--charcoal) !important;
+    box-shadow: none !important;
+    padding: var(--space-lg) !important;
+    border-radius: var(--radius-card) !important;
+    page-break-inside: avoid !important;
+  }
+
+  .wc-passport-name {
+    color: var(--charcoal) !important;
+    font-size: var(--text-h2) !important;
+  }
+
+  .wc-passport-skill {
+    color: var(--stone) !important;
+    font-size: var(--text-body) !important;
+  }
+
+  .wc-stat-box strong {
+    color: var(--charcoal) !important;
+    font-size: var(--text-h3) !important;
+  }
+
+  .wc-stat-box span {
+    color: var(--stone) !important;
+  }
+
+  .wc-passport-stats-row {
+    border-color: var(--border) !important;
+  }
+
+  .wc-skill-count-chip {
+    background: var(--linen) !important;
+    color: var(--charcoal) !important;
+    border: 1px solid var(--border) !important;
+  }
+
+  .wc-passport-qr-section {
+    background: var(--paper) !important;
+    border: 1px solid var(--border) !important;
+    margin-top: var(--space-xs) !important;
+  }
+
+  .wc-passport-qr-hint {
+    color: var(--stone) !important;
+  }
+
+  /* Receipt Print */
+  .wc-receipt-card {
+    border: 1px solid var(--border-strong) !important;
+    box-shadow: none !important;
+    padding: var(--space-lg) !important;
+  }
+}

@@ -8,23 +8,38 @@ import { AppError } from '../../../../shared/errors.js';
 
 export function getFeed(userId, role, query = {}) {
   const db = readDb();
-  const { cursor = 0, limit = 15 } = query;
+  const { cursor = 0, limit = 15, filter = 'all' } = query;
 
   const followedWorkerIds = db.follows.filter((f) => f.fromUserId === userId).map((f) => f.toUserId);
 
   let feedItems = [];
 
-  // Posts by followed workers or recent posts
-  const posts = db.posts.map((p) => ({
-    type: 'post',
-    id: p.id,
-    item: structuredClone(p),
-    createdAt: p.createdAt,
-    isFollowed: followedWorkerIds.includes(p.workerId),
-  }));
-  feedItems.push(...posts);
+  // Posts by workers
+  if (filter === 'all' || filter === 'posts') {
+    const posts = db.posts.map((p) => {
+      const worker = db.users.find((u) => u.id === p.workerId);
+      const isSaved = db.follows.some((f) => f.fromUserId === userId && f.toUserId === p.workerId && f.type === 'save');
+      const isFollowing = followedWorkerIds.includes(p.workerId);
+      return {
+        type: 'post',
+        id: p.id,
+        item: {
+          ...structuredClone(p),
+          workerName: worker?.name || p.workerName || 'Worker',
+          workerArea: worker?.area || p.workerArea || 'Pune',
+          workerPhotoUrl: worker?.photoUrl || p.workerPhotoUrl || null,
+          passportSlug: worker?.passportSlug || null,
+          isSaved,
+          isFollowing,
+        },
+        createdAt: p.createdAt,
+      };
+    });
+    feedItems.push(...posts);
+  }
 
-  if (role === 'worker') {
+  // Open Jobs (workers only)
+  if (role === 'worker' && (filter === 'all' || filter === 'jobs')) {
     const openJobs = db.jobs.filter((j) => j.status === 'open').map((j) => ({
       type: 'open_job',
       id: j.id,
@@ -34,14 +49,28 @@ export function getFeed(userId, role, query = {}) {
     feedItems.push(...openJobs);
   }
 
-  if (role === 'customer') {
+  // Free Workers (customers only)
+  if (role === 'customer' && (filter === 'all' || filter === 'freenow')) {
     const now = new Date().toISOString();
     const freeWorkers = db.availability.filter((a) => a.expiresAt > now).map((a) => {
       const worker = db.users.find((u) => u.id === a.workerId);
+      const entries = db.passportEntries.filter((p) => p.workerId === a.workerId);
+      const jobsCompleted = entries.length;
+      const totalRating = entries.reduce((acc, p) => acc + (p.fields?.rating || 5), 0);
+      const rating = jobsCompleted > 0 ? Math.round((totalRating / jobsCompleted) * 10) / 10 : 4.8;
+      const isSaved = db.follows.some((f) => f.fromUserId === userId && f.toUserId === a.workerId && f.type === 'save');
+
       return {
         type: 'free_now',
         id: a.id,
-        item: { ...structuredClone(a), workerName: worker?.name || 'Worker' },
+        item: {
+          ...structuredClone(a),
+          workerName: worker?.name || 'Worker',
+          rating,
+          jobsCompleted,
+          passportSlug: worker?.passportSlug,
+          isSaved,
+        },
         createdAt: a.createdAt,
       };
     });
@@ -58,6 +87,7 @@ export function getFeed(userId, role, query = {}) {
   return { feed: items, nextCursor, total: feedItems.length };
 }
 
+
 export function createPost(workerId, body) {
   const errors = validatePostCreate(body);
   if (errors.length > 0) throw new AppError('VALIDATION_ERROR', errors[0].message, 400, errors);
@@ -66,18 +96,34 @@ export function createPost(workerId, body) {
   const worker = db.users.find((u) => u.id === workerId && u.role === 'worker');
   if (!worker) throw new AppError('WRONG_ROLE', 'Only workers can publish work posts.', 403);
 
-  const { skill, caption, beforePhotoUrl, afterPhotoUrl } = body;
+  const { skill, caption, beforePhotoUrl, afterPhotoUrl, linkedBookingId } = body;
+
+  let linkedBooking = null;
+  if (linkedBookingId) {
+    const booking = db.bookings.find(
+      (b) => b.id === linkedBookingId && b.workerId === workerId && b.status === 'completed'
+    );
+    if (!booking) {
+      throw new AppError('VALIDATION_ERROR', 'Linked job must be a completed job of yours.', 400);
+    }
+    linkedBooking = {
+      bookingId: booking.id,
+      skill: booking.skill,
+      finishedAt: booking.finishedAt,
+    };
+  }
 
   const newPost = {
     id: `post-${Date.now()}`,
     workerId,
     workerName: worker.name,
     workerArea: worker.area,
+    workerPhotoUrl: worker.photoUrl || null,
     skill,
     caption: caption.trim(),
     beforePhotoUrl: beforePhotoUrl || null,
     afterPhotoUrl: afterPhotoUrl || null,
-    likesCount: 0,
+    linkedBooking,
     createdAt: new Date().toISOString(),
     isSample: false,
   };
@@ -87,6 +133,28 @@ export function createPost(workerId, body) {
 
   return { post: structuredClone(newPost) };
 }
+
+export function deletePost(workerId, postId) {
+  const db = readDb();
+  const postIndex = db.posts.findIndex((p) => p.id === postId);
+  if (postIndex === -1) throw new AppError('NOT_FOUND', 'Work post not found.', 404);
+
+  const post = db.posts[postIndex];
+  if (post.workerId !== workerId) {
+    throw new AppError('FORBIDDEN', 'You can only delete your own posts.', 403);
+  }
+
+  db.posts.splice(postIndex, 1);
+  writeDb(db);
+  return { message: 'Post deleted successfully.' };
+}
+
+export function getMyPosts(workerId) {
+  const db = readDb();
+  const posts = db.posts.filter((p) => p.workerId === workerId);
+  return { posts: structuredClone(posts) };
+}
+
 
 export function toggleFollow(fromUserId, body) {
   const { toUserId, type = 'follow' } = body;
@@ -115,6 +183,26 @@ export function toggleFollow(fromUserId, body) {
 
   writeDb(db);
   return { active, type, toUserId };
+}
+
+export function getFollows(fromUserId, type = 'save') {
+  const db = readDb();
+  const follows = db.follows.filter((follow) => follow.fromUserId === fromUserId && follow.type === type);
+  const workers = follows.map((follow) => {
+    const worker = db.users.find((user) => user.id === follow.toUserId && user.role === 'worker');
+    if (!worker) return null;
+    const entries = db.passportEntries.filter((entry) => entry.workerId === worker.id);
+    const totalRating = entries.reduce((sum, entry) => sum + (entry.fields?.rating || 5), 0);
+    const rating = entries.length ? Math.round((totalRating / entries.length) * 10) / 10 : 4.8;
+    return {
+      id: worker.id, name: worker.name, skills: worker.skills, rate: worker.rate,
+      rateUnit: worker.rateUnit, area: worker.area, city: worker.city, rating,
+      jobsCompleted: entries.length, passportSlug: worker.passportSlug,
+      isFreeNow: db.availability.some((availability) => availability.workerId === worker.id && availability.expiresAt > new Date().toISOString()),
+      isSample: Boolean(worker.isSample),
+    };
+  }).filter(Boolean);
+  return { workers };
 }
 
 export function addEndorsement(customerId, body) {

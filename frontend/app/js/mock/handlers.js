@@ -15,7 +15,6 @@ import * as radarService from './services/radarService.js';
 import * as compassService from './services/compassService.js';
 import * as feedService from './services/feedService.js';
 import * as uploadService from './services/uploadService.js';
-import { generateQrDataUrl } from '../utils/qr.js';
 import { AppError } from '../../../shared/errors.js';
 import { LIMITS } from '../../../shared/constants.js';
 
@@ -81,7 +80,7 @@ export async function handleMockRequest(method, path, body = {}, headers = {}) {
     } else if (method === 'PATCH' && cleanPath === '/users/me/role') {
       result = ok(userService.setRole(requireAuth(sessionUserId), body.role));
     } else if (method === 'GET' && cleanPath === '/workers') {
-      result = ok(userService.searchWorkers(query));
+      result = ok(userService.searchWorkers(query, sessionUserId));
     } else if (method === 'GET' && cleanPath.match(/^\/workers\/[^/]+$/)) {
       const wId = cleanPath.split('/')[2];
       result = ok(userService.getWorkerById(wId, sessionUserId));
@@ -141,8 +140,8 @@ export async function handleMockRequest(method, path, body = {}, headers = {}) {
       result = ok(await passportService.verifyPassportChain(slug));
     } else if (method === 'GET' && cleanPath.match(/^\/passport\/[^/]+\/qr$/)) {
       const slug = cleanPath.split('/')[2];
-      const qrUrl = generateQrDataUrl(`https://workcred.in/passport/${slug}`);
-      result = ok({ qrDataUrl: qrUrl, passportSlug: slug });
+      const qrSvg = passportService.getPassportQrSvg(slug);
+      result = ok({ qrSvg, passportSlug: slug });
     } else if (method === 'GET' && cleanPath.match(/^\/passport\/[^/]+$/)) {
       const slug = cleanPath.split('/')[2];
       result = ok(passportService.getPublicPassport(slug));
@@ -153,8 +152,16 @@ export async function handleMockRequest(method, path, body = {}, headers = {}) {
       result = ok(radarService.setAvailability(requireAuth(sessionUserId), body));
     } else if (method === 'DELETE' && cleanPath === '/availability') {
       result = ok(radarService.clearAvailability(requireAuth(sessionUserId)));
+    } else if (method === 'GET' && (cleanPath === '/availability/status' || cleanPath === '/availability/me')) {
+      result = ok(radarService.getMyAvailability(requireAuth(sessionUserId)));
     } else if (method === 'GET' && cleanPath === '/availability/nearby') {
       result = ok(radarService.getNearbyAvailability(query));
+    }
+
+    // --- BOOKING PROBLEM REPORTS ---
+    else if (method === 'POST' && cleanPath.match(/^\/bookings\/[^/]+\/report$/)) {
+      const bId = cleanPath.split('/')[2];
+      result = ok(bookingService.reportBooking(requireAuth(sessionUserId), bId, body));
     }
 
     // --- COMPASS ---
@@ -169,8 +176,16 @@ export async function handleMockRequest(method, path, body = {}, headers = {}) {
       result = ok(feedService.getFeed(uId, user?.role || 'customer', query));
     } else if (method === 'POST' && cleanPath === '/posts') {
       result = ok(feedService.createPost(requireAuth(sessionUserId), body));
+    } else if (method === 'DELETE' && cleanPath.match(/^\/posts\/[^/]+$/)) {
+      const pId = cleanPath.split('/')[2];
+      result = ok(feedService.deletePost(requireAuth(sessionUserId), pId));
+    } else if (method === 'GET' && cleanPath === '/posts/mine') {
+      result = ok(feedService.getMyPosts(requireAuth(sessionUserId)));
     } else if (method === 'POST' && cleanPath === '/follows') {
       result = ok(feedService.toggleFollow(requireAuth(sessionUserId), body));
+    } else if (method === 'GET' && cleanPath === '/follows') {
+
+      result = ok(feedService.getFollows(requireAuth(sessionUserId), query.type || 'save'));
     } else if (method === 'DELETE' && cleanPath.match(/^\/follows\/[^/]+$/)) {
       const toId = cleanPath.split('/')[2];
       result = ok(feedService.toggleFollow(requireAuth(sessionUserId), { toUserId: toId, type: 'follow' }));
@@ -182,9 +197,26 @@ export async function handleMockRequest(method, path, body = {}, headers = {}) {
       result = ok({ message: 'Push subscription registered.' });
     }
 
+    // --- REPORTS ---
+    else if (method === 'POST' && cleanPath === '/reports') {
+      const uId = sessionUserId || 'anonymous';
+      if (!db.reports) db.reports = [];
+      const newReport = {
+        id: `rep-${Date.now()}`,
+        userId: uId,
+        ...body,
+        createdAt: new Date().toISOString(),
+      };
+      db.reports.push(newReport);
+      writeDb(db);
+      result = ok({ message: 'Report submitted successfully.', report: newReport });
+    }
+
     // --- DEV ACTIONS ---
     else if (method === 'POST' && cleanPath === '/dev/tamper-passport') {
       result = ok(passportService.tamperEntry(body.workerId || 'user-worker-ravi', body.seq || 1));
+    } else if (method === 'POST' && cleanPath === '/dev/reset-tamper-passport') {
+      result = ok(passportService.resetTamper(body.workerId || 'user-worker-ravi', body.seq || 1));
     }
 
     else {

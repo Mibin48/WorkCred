@@ -30,4 +30,10 @@ export const passportApi = {
     const result = await http.post('/dev/tamper-passport', { workerId, seq });
     return unwrap(result);
   },
+
+  async resetTamper(workerId, seq) {
+    const result = await http.post('/dev/reset-tamper-passport', { workerId, seq });
+    return unwrap(result);
+  },
 };
+

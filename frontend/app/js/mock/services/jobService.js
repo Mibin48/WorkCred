@@ -20,7 +20,7 @@ export function createJob(customerId, body) {
     throw new AppError('WRONG_ROLE', 'Only customer accounts can post jobs.', 403);
   }
 
-  const { title, description = '', skill, area, city, lat, lng, rate, rateUnit = 'day', slotsNeeded = 1 } = body;
+  const { title, description = '', skill, area, city, lat, lng, rate, rateUnit = 'day', slotsNeeded = 1, hoursPerWorker = 1, scheduledAt = null } = body;
 
   const jobId = `job-${Date.now()}`;
   const newJob = {
@@ -34,6 +34,8 @@ export function createJob(customerId, body) {
     location: { type: 'Point', coordinates: [Number(lng), Number(lat)] },
     rate: Number(rate),
     rateUnit,
+    hoursPerWorker: Number(hoursPerWorker) || 1,
+    scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : null,
     slotsNeeded: Number(slotsNeeded),
     slotsFilled: 0,
     status: 'open',
@@ -131,6 +133,8 @@ export function acceptJob(workerId, jobId) {
     status: 'confirmed',
     rate: job.rate,
     rateUnit: job.rateUnit,
+    scheduledAt: job.scheduledAt || null,
+    hours: Number(job.hoursPerWorker) || 1,
     startCode,
     finishCode,
     createdAt: new Date().toISOString(),

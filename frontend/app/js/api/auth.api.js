@@ -2,6 +2,8 @@ import { http, unwrap } from './http.js';
 import { store } from '../store.js';
 import { readDb, writeDb, resetDb } from '../mock/db.js';
 import { config } from '../config.js';
+import { clearOfflineCache } from '../offline/cache.js';
+import { clearQueue } from '../offline/queue.js';
 
 function saveMockSession(session) {
   if (!config.USE_MOCK) return;
@@ -43,12 +45,17 @@ export const authApi = {
     const token = store.get().session?.accessToken;
     try { unwrap(await http.post('/auth/logout', {}, token)); } finally {
       clearMockSession();
+      void clearOfflineCache();
+      clearQueue();
       store.setSession(null);
     }
   },
   resetDemoData() {
     if (!config.USE_MOCK) return;
     resetDb();
+    void clearOfflineCache();
+    clearQueue();
     store.setSession(null);
   },
 };
+

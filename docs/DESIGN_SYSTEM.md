@@ -59,6 +59,19 @@ The full inventory also includes typography variants, 8px rhythm spacers, border
 - **Tabs:** fixed floating pill navigation with icon and text; active state also uses `aria-current="page"`.
 - **Feedback:** Toast uses a polite live region; Skeleton signals loading; EmptyState explains what belongs in the view; ErrorState includes a retry action; OfflineBanner announces connection state.
 - **Dialogs:** native `dialog` for modal behavior, with a bottom-sheet shape on compact screens.
+- **Customer discovery:** SearchField provides skill suggestions; WorkerCard presents profile, rating, approximate distance, rate, verification, availability, and save state; FilterSheet groups keyboard-operable skill, distance, rate, rating, and sort controls; RangeSlider exposes a labelled two-thumb price range.
+- **Worker profile:** PassportPreview, IntegrityBadge, and LocalityPicker show public work history, hash-check status, and an approximate service area. Contact details remain hidden on profiles.
+- **Booking and jobs:** DayTimePicker, Stepper, CompassBar, BookingCard, CodeDisplay, StatusTimeline, SegmentedTabs, and ConfirmSheet cover customer scheduling and job status. Booking codes start masked and reveal only on request.
+- **Customer completion:** booking and finish sheets keep payment confirmation, ratings, optional notes, and error feedback in a single accessible flow.
+- **Worker Free Now:** FreeNowCard handles idle chips (2h, 4h, 8h), active animated timer with countdown ring SVG, extend, stop, and offline warning states.
+- **Worker Job & Booking Operations:** RequestCard, WorkerJobCard, StartCodeSheet (with optional geolocation and lockout protections), and ReportSheet for live problem escalations and customer dispute handling.
+- **Worker Availability & Profile:** WeekAvailabilityGrid (morning, afternoon, evening matrix), BlockedDatesList, SkillPicker with primary skill indicator, and live CompassBar market rate feedback.
+- **Work Passport & Verification:** PassportCard (Espresso theme hero with animated count-up and QR), IntegrityStrip (plain-English chain verification status), ChainVisual (4 linked check markers), VerificationExplainerSheet ("How we check" 3-step guide), TimelineEntry (with visibility/masking toggles and 8-character Record ID), EntryDetailSheet, and ReportSheetModal for incident logging.
+- **Receipts & Handshake Polish:** ReceiptCard (cash payment summary, hours, rating, and Passport deep-link for both customer and worker), HelpSheet ("Having trouble?" 3 plain troubleshooting tips), and collapsible JobRecord evidence audit.
+- **Feed & Work Posts:** WorkPostCard (Before/After side-by-side or single photo, 140-char caption, verified job badge, follow/save actions), FreeWorkerCard (live dot, remaining time countdown, direct booking trigger), and ImageViewerModal (accessible focus-trapped image zoom).
+- **PWA & Offline Resilience:** InstallBanner (non-intrusive Add to Home Screen trigger), SavedCopyBanner (indicates offline cached data with timestamp), DataSaverNotice (respects `navigator.connection.saveData`), and SWUpdateToast for seamless updates without form interruption.
+- **Print Stylesheet:** `css/print.css` for clean A6 ID-card passport and receipt printing without interactive chrome or navigation.
+
 
 ## Layout and accessibility
 

@@ -44,6 +44,13 @@ export function setAvailability(workerId, body) {
   return { availability: structuredClone(avail) };
 }
 
+export function getMyAvailability(workerId) {
+  const db = readDb();
+  const now = new Date().toISOString();
+  const active = db.availability.find((a) => a.workerId === workerId && a.expiresAt > now);
+  return { availability: active ? structuredClone(active) : null, isFreeNow: Boolean(active) };
+}
+
 export function clearAvailability(workerId) {
   const db = readDb();
   db.availability = db.availability.filter((a) => a.workerId !== workerId);

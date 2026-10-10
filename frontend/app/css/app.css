@@ -2,6 +2,7 @@
 @import url('../../css/fonts.css');
 @import url('./components.css');
 @import url('./layouts.css');
+@import url('./print.css');
 
 :root { color-scheme: light; }
 * { box-sizing: border-box; }

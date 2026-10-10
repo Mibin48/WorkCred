@@ -11,6 +11,11 @@ export const radarApi = {
     return unwrap(result);
   },
 
+  async getMyAvailability(token) {
+    const result = await http.get('/availability/status', { token });
+    return unwrap(result);
+  },
+
   async getNearbyAvailability(query = {}, token) {
     const result = await http.get('/availability/nearby', { query, token });
     return unwrap(result);

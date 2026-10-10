@@ -22,12 +22,18 @@ export function updateMe(userId, updates) {
   const user = db.users.find((u) => u.id === userId);
   if (!user) throw new AppError('UNAUTHENTICATED', 'User not found.', 401);
 
-  const allowed = ['name', 'skills', 'rate', 'rateUnit', 'area', 'city', 'profileComplete', 'bio', 'location'];
+  const allowed = ['name', 'skills', 'mainSkill', 'rate', 'rateUnit', 'area', 'city', 'profileComplete', 'bio', 'location', 'calendar', 'blockedDates', 'radiusKm', 'photoUrl'];
   for (const key of allowed) {
     if (key in updates) user[key] = updates[key];
   }
   if (!user.passportSlug && user.role === 'worker' && user.name) {
     user.passportSlug = `${user.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Math.floor(100 + Math.random() * 900)}`;
+  }
+  if (!user.calendar && user.role === 'worker') {
+    user.calendar = { monday: 'full', tuesday: 'full', wednesday: 'full', thursday: 'full', friday: 'full', saturday: 'full', sunday: 'off' };
+  }
+  if (!user.blockedDates && user.role === 'worker') {
+    user.blockedDates = [];
   }
 
   writeDb(db);
@@ -50,15 +56,19 @@ export function setRole(userId, role) {
   return { user: structuredClone(user) };
 }
 
-export function searchWorkers(query = {}) {
+export function searchWorkers(query = {}, currentUserId = null) {
   const db = readDb();
   const {
     skill,
+    skills,
+    q = '',
     lat = 18.5204,
     lng = 73.8567,
     radiusKm = 5,
     minRating = 0,
+    minRate = 0,
     maxRate = 99999,
+    freeNow = 'false',
     sortBy = 'distance',
     cursor = 0,
     limit = 20,
@@ -66,11 +76,19 @@ export function searchWorkers(query = {}) {
 
   let workers = db.users.filter((u) => u.role === 'worker' && u.profileComplete);
 
-  if (skill) {
-    workers = workers.filter((w) => w.skills.includes(skill));
+  const selectedSkills = skills ? String(skills).split(',').filter(Boolean) : skill ? [skill] : [];
+  if (selectedSkills.length) {
+    workers = workers.filter((w) => selectedSkills.some((entry) => w.skills.includes(entry)));
   }
-  if (maxRate < 99999) {
-    workers = workers.filter((w) => w.rate && w.rate <= maxRate);
+  if (q) {
+    const term = String(q).trim().toLowerCase();
+    workers = workers.filter((worker) => worker.name.toLowerCase().includes(term) || worker.skills.some((entry) => entry.includes(term)) || worker.area.toLowerCase().includes(term));
+  }
+  if (Number(minRate) > 0 || Number(maxRate) < 99999) {
+    workers = workers.filter((w) => {
+      const hourly = w.rateUnit === 'hour' ? Number(w.rate) : Number(w.rate) / 8;
+      return hourly >= Number(minRate) && hourly <= Number(maxRate);
+    });
   }
 
   const results = workers.map((worker) => {
@@ -96,10 +114,13 @@ export function searchWorkers(query = {}) {
       distanceLabel: roundedDistanceLabel(distanceKm),
       rating: averageRating,
       jobsCompleted,
-      passportSlug: worker.passportSlug,
+      passportSlug: entries.length ? worker.passportSlug : null,
+      isFreeNow: db.availability.some((entry) => entry.workerId === worker.id && entry.expiresAt > new Date().toISOString()),
+      isSaved: db.follows.some((follow) => follow.fromUserId === currentUserId && follow.toUserId === worker.id && follow.type === 'save'),
       isSample: Boolean(worker.isSample),
     };
-  }).filter((w) => w.distanceKm <= radiusKm && w.rating >= minRating);
+  }).filter((w) => w.distanceKm <= Number(radiusKm) && w.rating >= Number(minRating))
+    .filter((worker) => freeNow !== 'true' || worker.isFreeNow);
 
   if (sortBy === 'distance') {
     results.sort((a, b) => a.distanceKm - b.distanceKm);
@@ -128,8 +149,12 @@ export function getWorkerById(workerId, currentUserId) {
   const averageRating = jobsCompleted > 0 ? Math.round((totalRating / jobsCompleted) * 10) / 10 : 4.8;
 
   const endorsementsCount = db.endorsements.filter((e) => e.workerId === worker.id).length;
+  const endorsements = Object.fromEntries(worker.skills.map((skill) => [skill, db.endorsements.filter((entry) => entry.workerId === worker.id && entry.skill === skill).length]));
   const isFollowing = db.follows.some((f) => f.fromUserId === currentUserId && f.toUserId === worker.id && f.type === 'follow');
   const isSaved = db.follows.some((f) => f.fromUserId === currentUserId && f.toUserId === worker.id && f.type === 'save');
+  const totalHoursWorked = entries.reduce((sum, entry) => sum + Number(entry.fields?.hoursWorked || 0), 0);
+  const availability = db.availability.find((entry) => entry.workerId === worker.id && entry.expiresAt > new Date().toISOString());
+  const scheduled = db.bookings.filter((booking) => booking.workerId === worker.id && ['pending', 'confirmed', 'in_progress'].includes(booking.status));
 
   return {
     worker: {
@@ -143,6 +168,19 @@ export function getWorkerById(workerId, currentUserId) {
       bio: worker.bio,
       rating: averageRating,
       jobsCompleted,
+      totalHoursWorked,
+      distanceKm: haversineKm(18.5204, 73.8567, worker.location?.coordinates?.[1] ?? 18.5204, worker.location?.coordinates?.[0] ?? 73.8567),
+      isFreeNow: Boolean(availability),
+      availability: availability ? [{ label: `Available for ${availability.hours} more hours`, expiresAt: availability.expiresAt }] : [],
+      busyWindows: scheduled.filter((booking) => booking.scheduledAt).map((booking) => ({ scheduledAt: booking.scheduledAt, hours: booking.hours || 1 })),
+      passportEntries: entries.slice().sort((a, b) => b.seq - a.seq).slice(0, 3).map((entry) => {
+        const customer = db.users.find((person) => person.id === entry.fields.customerId);
+        return {
+          skill: entry.fields.skill, createdAt: entry.createdAt, hoursWorked: entry.fields.hoursWorked,
+          rating: entry.fields.rating, customerNameMasked: customer?.name ? `${customer.name.trim().split(/\s+/)[0]}***` : 'Local Customer',
+        };
+      }),
+      endorsements,
       endorsementsCount,
       passportSlug: worker.passportSlug,
       isFollowing,
