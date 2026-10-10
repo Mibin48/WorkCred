@@ -248,11 +248,45 @@ window.addEventListener('beforeinstallprompt', (e) => {
   }
 });
 
+// 4. Cross-tab Auth Event Synchronization
+if (typeof BroadcastChannel !== 'undefined') {
+  try {
+    const authChannel = new BroadcastChannel('workcred_auth');
+    authChannel.addEventListener('message', (event) => {
+      if (event.data?.type === 'logout') {
+        store.set({ session: null });
+        router.navigate('/welcome', { replace: true });
+      }
+    });
+  } catch {
+    // Ignore BroadcastChannel errors in restricted contexts
+  }
+}
+
+// 5. Initial Boot Sequence with Brand Splash
+if (root && !root.hasChildNodes()) {
+  root.innerHTML = `
+    <div class="wc-app-splash" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;text-align:center;">
+      <div class="wc-app-splash__logo" style="font-size:2rem;font-weight:700;letter-spacing:-0.03em;color:var(--wc-text-primary,#1a1a1a);font-family:var(--wc-font-serif,serif);margin-bottom:0.5rem;">WorkCred</div>
+      <div class="wc-app-splash__tagline" style="font-size:0.9rem;color:var(--wc-text-muted,#666);margin-bottom:2rem;">Proof of work, work near you.</div>
+      <div class="wc-spinner" style="width:28px;height:28px;border:3px solid var(--wc-border,#e5e0d8);border-top-color:var(--wc-primary,#2e5a44);border-radius:50%;animation:wc-spin 0.8s linear infinite;" aria-label="Loading..."></div>
+    </div>
+  `;
+}
+
 await authApi.restoreSession();
 void handleQueueFlush();
 
 if (!location.hash) {
   const role = new URLSearchParams(location.search).get('role');
-  router.navigate(['worker', 'customer'].includes(role) ? '/login' : '/welcome', { replace: true, role: ['worker', 'customer'].includes(role) ? role : undefined });
-} else await router.start();
+  const user = store.get().session?.user;
+  if (user) {
+    router.navigate(!user.role ? '/role' : !user.profileComplete ? '/onboarding' : user.role === 'worker' ? '/w/home' : '/c/find', { replace: true });
+  } else {
+    router.navigate(['worker', 'customer'].includes(role) ? '/login' : '/welcome', { replace: true, role: ['worker', 'customer'].includes(role) ? role : undefined });
+  }
+} else {
+  await router.start();
+}
+
 
