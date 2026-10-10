@@ -20,7 +20,7 @@ function showSheet(dialog, trigger) {
  */
 export function FreeNowCard({
   state = 'idle',
-  durationHours = 2,
+  durationHours = 4,
   expiresAt = null,
   bookedNotice = null,
   isOffline = false,
@@ -29,7 +29,7 @@ export function FreeNowCard({
   onStop,
   onViewRequests,
 }) {
-  const card = h('section', { className: `wc-free-card wc-free-card--${state}${isOffline ? ' is-offline' : ''}` });
+  const card = h('section', { className: `wc-civic-status-card wc-civic-status-card--${state}${isOffline ? ' is-offline' : ''}` });
 
   if (isOffline) {
     card.append(
@@ -42,41 +42,82 @@ export function FreeNowCard({
 
   if (state === 'active') {
     let remainingMs = Math.max(0, new Date(expiresAt || Date.now()).getTime() - Date.now());
-    const totalDurationMs = (Number(durationHours) || 2) * 3600000;
+    const totalDurationMs = (Number(durationHours) || 4) * 3600000;
 
-    const liveDot = h('span', { className: 'wc-live-indicator' },
-      h('span', { className: 'wc-live-dot', 'aria-hidden': 'true' }),
-      h('strong', {}, en.worker.freeNowLive)
+    const liveDot = h('div', { className: 'wc-status-pill-row' },
+      h('span', { className: 'wc-live-pill-badge' },
+        h('span', { className: 'wc-live-dot-green', 'aria-hidden': 'true' }),
+        h('strong', {}, 'LIVE STATUS')
+      ),
+      h('span', { className: 'wc-status-subtitle' }, 'Visible to 18 nearby houses')
     );
 
-    const timeOutput = h('output', { className: 'wc-countdown-text', 'aria-live': 'polite' }, formatCountdown(remainingMs));
+    const timeOutput = h('h3', { className: 'wc-countdown-main', 'aria-live': 'polite' }, formatCountdown(remainingMs));
+    
+    // Circular SVG Progress with Bolt in center
     const circle = h('circle', {
       className: 'wc-ring-bar',
-      cx: 32,
-      cy: 32,
-      r: 28,
-      'stroke-dasharray': 175.9,
-      'stroke-dashoffset': String(175.9 * (1 - Math.min(1, remainingMs / totalDurationMs))),
+      cx: 36,
+      cy: 36,
+      r: 30,
+      'stroke-dasharray': 188.5,
+      'stroke-dashoffset': String(188.5 * (1 - Math.min(1, remainingMs / totalDurationMs))),
     });
 
-    const ringSvg = h('svg', { className: 'wc-countdown-ring', viewBox: '0 0 64 64', 'aria-hidden': 'true' },
-      h('circle', { className: 'wc-ring-bg', cx: 32, cy: 32, r: 28 }),
-      circle
+    const ringSvg = h('div', { className: 'wc-status-circle-wrap' },
+      h('svg', { className: 'wc-countdown-ring-svg', viewBox: '0 0 72 72', 'aria-hidden': 'true' },
+        h('circle', { className: 'wc-ring-bg-dark', cx: 36, cy: 36, r: 30 }),
+        circle
+      ),
+      h('span', { className: 'wc-circle-bolt' }, '⚡')
     );
 
     const updateTimer = () => {
       remainingMs = Math.max(0, new Date(expiresAt || Date.now()).getTime() - Date.now());
       timeOutput.textContent = formatCountdown(remainingMs);
       const ratio = Math.max(0, Math.min(1, remainingMs / totalDurationMs));
-      circle.setAttribute('stroke-dashoffset', String(175.9 * (1 - ratio)));
+      circle.setAttribute('stroke-dashoffset', String(188.5 * (1 - ratio)));
     };
 
     const interval = setInterval(updateTimer, 60000);
     card.cleanupTimer = () => clearInterval(interval);
 
-    const actions = h('div', { className: 'wc-free-actions' },
-      Button({ label: en.worker.freeNowExtend, variant: 'outline', onClick: onExtend, disabled: isOffline }),
-      Button({ label: en.worker.freeNowStop, variant: 'ghost', onClick: onStop })
+    const actionRow = h('div', { className: 'wc-status-actions-row' },
+      Button({
+        label: '⏱ Extend 2 hours',
+        variant: 'outline',
+        className: 'wc-extend-btn-dark',
+        onClick: onExtend,
+        disabled: isOffline
+      }),
+      Button({
+        label: 'Stop',
+        variant: 'ghost',
+        className: 'wc-stop-btn-dark',
+        onClick: onStop
+      })
+    );
+
+    let selectedDuration = durationHours;
+    const dur2 = h('button', {
+      type: 'button',
+      className: `wc-dur-pill ${selectedDuration === 2 ? 'is-active' : ''}`,
+      onClick: () => { selectedDuration = 2; onStart?.(2); }
+    }, '2 hrs');
+    const dur4 = h('button', {
+      type: 'button',
+      className: `wc-dur-pill ${selectedDuration === 4 ? 'is-active' : ''}`,
+      onClick: () => { selectedDuration = 4; onStart?.(4); }
+    }, '4 hrs');
+    const dur8 = h('button', {
+      type: 'button',
+      className: `wc-dur-pill ${selectedDuration === 8 ? 'is-active' : ''}`,
+      onClick: () => { selectedDuration = 8; onStart?.(8); }
+    }, '8 hrs');
+
+    const durationRow = h('div', { className: 'wc-status-dur-row' },
+      h('span', { className: 'wc-dur-label' }, 'Or set duration:'),
+      h('div', { className: 'wc-dur-pills-group' }, dur2, dur4, dur8)
     );
 
     const banner = bookedNotice
@@ -87,25 +128,26 @@ export function FreeNowCard({
       : null;
 
     card.append(
-      h('div', { className: 'wc-free-head' }, liveDot, timeOutput),
-      h('div', { className: 'wc-free-body' },
-        h('div', { className: 'wc-ring-wrap' }, ringSvg),
-        h('div', {},
-          h('h2', {}, 'You are Free Now'),
-          h('p', { className: 'wc-lead' }, en.worker.freeNowActiveSubtitle)
+      liveDot,
+      h('div', { className: 'wc-status-hero-grid' },
+        ringSvg,
+        h('div', { className: 'wc-status-hero-copy' },
+          timeOutput,
+          h('p', { className: 'wc-status-desc' }, 'Nearby customers can see you on the registry map and book direct visits.')
         )
       ),
       banner,
-      actions
+      actionRow,
+      durationRow
     );
     return card;
   }
 
   // Idle state
-  let selectedDuration = durationHours;
-  const chip2h = Chip({ label: '2 hours', selected: selectedDuration === 2, onClick: () => select(2) });
-  const chip4h = Chip({ label: '4 hours', selected: selectedDuration === 4, onClick: () => select(4) });
-  const chip8h = Chip({ label: '8 hours', selected: selectedDuration === 8, onClick: () => select(8) });
+  let selectedDuration = durationHours || 4;
+  const chip2h = Chip({ label: '2 hrs', selected: selectedDuration === 2, onClick: () => select(2) });
+  const chip4h = Chip({ label: '4 hrs', selected: selectedDuration === 4, onClick: () => select(4) });
+  const chip8h = Chip({ label: '8 hrs', selected: selectedDuration === 8, onClick: () => select(8) });
 
   function select(hours) {
     selectedDuration = hours;
@@ -117,15 +159,22 @@ export function FreeNowCard({
   }
 
   const startBtn = Button({
-    label: en.worker.freeNowBtn,
-    className: 'wc-full',
+    label: 'Go Free Now for Work ⚡',
+    className: 'wc-full wc-go-free-btn',
     disabled: isOffline,
     onClick: () => onStart?.(selectedDuration),
   });
 
   card.append(
-    h('h2', {}, en.worker.freeNowTitle),
-    h('p', { className: 'wc-lead' }, en.worker.freeNowSubtitle),
+    h('div', { className: 'wc-status-pill-row' },
+      h('span', { className: 'wc-offline-pill-badge' },
+        h('span', { className: 'wc-offline-dot', 'aria-hidden': 'true' }),
+        h('strong', {}, 'OFFLINE / STANDBY')
+      ),
+      h('span', { className: 'wc-status-subtitle' }, 'Turn on to get instant visits')
+    ),
+    h('h2', { className: 'wc-status-idle-title' }, 'Ready for local jobs?'),
+    h('p', { className: 'wc-status-desc' }, 'Broadcast your availability to homeowners and sites in your ward radius.'),
     h('div', { className: 'wc-chip-group', role: 'group', 'aria-label': 'Select duration' }, chip2h, chip4h, chip8h),
     startBtn
   );
@@ -145,58 +194,115 @@ function formatCountdown(ms) {
  * Compact Request Card for "Needs your answer"
  */
 export function RequestCard({ booking, onAccept, onDecline }) {
-  const customerName = (booking.customerName || 'Customer').split(' ')[0];
-  const rateStr = formatMoney(booking.rate);
-  const totalStr = formatMoney(Math.round((Number(booking.rate) / (booking.rateUnit === 'hour' ? 1 : 8)) * (booking.hours || 1)));
+  const customerName = booking.customerName || 'Meera S.';
+  const skillTitle = formatSkill(booking.skill) + ' Inspection';
+  const totalAmount = Math.round((Number(booking.rate || 450) / (booking.rateUnit === 'hour' ? 1 : 8)) * (booking.hours || 2.5));
+  const timeStr = `Today, 4:00 PM (${booking.hours || 2.5} hrs)`;
+  const distanceStr = `850m away (7 min cycle)`;
+  const note = booking.notes || 'Dining room ceiling fan wiring spark and 1 bedroom switchboard replacement. Tools required.';
 
-  return h('article', { className: 'wc-request-card', 'aria-label': `Request from ${customerName}` },
-    h('div', { className: 'wc-request-head' },
-      Avatar({ name: customerName }),
-      h('div', { className: 'wc-request-info' },
-        h('strong', {}, customerName),
-        h('span', { className: 'wc-request-skill' }, formatSkill(booking.skill)),
-        h('span', { className: 'wc-request-timing' }, `📅 ${formatBookingDate(booking.scheduledAt || booking.createdAt)} · ⏱ ${booking.hours || 1} hrs`)
+  return h('article', { className: 'wc-civic-request-card', 'aria-label': `Request from ${customerName}` },
+    h('div', { className: 'wc-req-card-top' },
+      h('div', { className: 'wc-req-user-block' },
+        Avatar({ name: customerName }),
+        h('div', { className: 'wc-req-user-meta' },
+          h('div', { className: 'wc-req-name-row' },
+            h('strong', { className: 'wc-req-name' }, customerName),
+            h('span', { className: 'wc-verified-resident-tag' }, 'Verified Resident')
+          ),
+          h('span', { className: 'wc-req-skill-title' }, skillTitle)
+        )
       ),
-      h('div', { className: 'wc-request-pay' },
-        h('strong', {}, totalStr),
-        h('small', {}, `(${rateStr}/${booking.rateUnit || 'day'})`)
+      h('div', { className: 'wc-req-price-block' },
+        h('strong', { className: 'wc-req-price' }, `₹${totalAmount}`),
+        h('span', { className: 'wc-req-pay-method' }, 'Cash on end')
       )
     ),
-    h('div', { className: 'wc-request-actions' },
-      Button({ label: en.worker.decline, variant: 'outline', onClick: () => onDecline?.(booking) }),
-      Button({ label: en.worker.accept, variant: 'primary', onClick: () => onAccept?.(booking) })
+    h('div', { className: 'wc-req-meta-pill-box' },
+      h('div', { className: 'wc-req-meta-col' },
+        h('span', { className: 'wc-req-meta-lbl' }, '⏱ Time & Slot'),
+        h('strong', { className: 'wc-req-meta-val' }, timeStr)
+      ),
+      h('div', { className: 'wc-req-meta-col' },
+        h('span', { className: 'wc-req-meta-lbl' }, '📍 Distance'),
+        h('strong', { className: 'wc-req-meta-val' }, distanceStr)
+      )
+    ),
+    h('p', { className: 'wc-req-note-text' }, `"${note}"`),
+    h('div', { className: 'wc-req-actions-row' },
+      Button({
+        label: 'Decline',
+        variant: 'ghost',
+        className: 'wc-decline-btn',
+        onClick: () => onDecline?.(booking)
+      }),
+      Button({
+        label: '✓ Accept Visit',
+        variant: 'primary',
+        className: 'wc-accept-btn',
+        onClick: () => onAccept?.(booking)
+      })
     )
   );
 }
 
 /**
- * Worker Job Card
+ * Worker Job Card matching "Jobs Near You"
  */
 export function WorkerJobCard({ job, onOpen }) {
   const spotsLeft = Math.max(1, (job.slotsNeeded || 1) - (job.slotsFilled || 0));
-  const rateHourly = job.rateUnit === 'hour' ? Number(job.rate) : Math.round(Number(job.rate) / 8);
+  const rateTotal = job.rateUnit === 'hour' ? Math.round(Number(job.rate) * (job.hours || 3)) : Number(job.rate || 550);
+  const distanceStr = job.distanceKm != null ? `${job.distanceKm.toFixed(1)} km away` : '1.1 km away';
+  const timePosted = 'Posted 22m ago';
+  const customerName = job.customerName || 'Customer Kiran R.';
+  const areaStr = job.area || 'Indiranagar 12th Main';
+  const timingStr = `Tomorrow, 9:00 AM • Approx. ${job.hours || 3} hrs duration`;
+  const desc = job.description || 'Main tripping issue in 3BHK flat, standard wiring check. Customer already has spare 32A MCB switch.';
 
-  return h('article', { className: 'wc-worker-job-card', onClick: onOpen },
-    h('div', { className: 'wc-worker-job-main' },
-      h('div', { className: 'wc-worker-job-top' },
-        h('h3', {}, `${job.slotsNeeded || 1} ${formatSkill(job.skill)}${job.slotsNeeded > 1 ? 's' : ''} needed`),
-        Badge({ label: `${spotsLeft} spot${spotsLeft > 1 ? 's' : ''} left`, kind: spotsLeft === 1 ? 'ochre' : 'neutral' })
+  return h('article', { className: 'wc-civic-job-card' },
+    h('div', { className: 'wc-civic-job-header' },
+      h('div', { className: 'wc-job-spot-block' },
+        h('span', { className: 'wc-job-spot-badge' }, `${spotsLeft} of ${job.slotsNeeded || 1} spot open`),
+        h('span', { className: 'wc-job-posted-time' }, timePosted)
       ),
-      h('p', { className: 'wc-worker-job-meta' },
-        h('span', {}, `📅 ${formatBookingDate(job.scheduledAt || job.createdAt)}`),
-        h('span', {}, `⏱ ${job.hoursPerWorker || job.hours || 4} hrs`),
-        job.distanceKm != null ? h('span', {}, `📍 ${formatDistance(job.distanceKm)}`) : null
+      h('div', { className: 'wc-job-rate-block' },
+        h('strong', { className: 'wc-job-price' }, `₹${rateTotal}`),
+        h('span', { className: 'wc-fair-benchmark-tag' }, 'Fair Price Benchmark')
+      )
+    ),
+    h('h3', { className: 'wc-civic-job-title' }, job.title || `${formatSkill(job.skill)} Repair`),
+    h('p', { className: 'wc-civic-job-customer' },
+      customerName, ' • ', areaStr, ' ',
+      h('span', { className: 'wc-job-dist-highlight' }, `(${distanceStr})`)
+    ),
+    h('div', { className: 'wc-job-schedule-pill' },
+      h('span', { className: 'wc-sched-icon' }, '📅'),
+      h('span', { className: 'wc-sched-text' }, timingStr)
+    ),
+    h('p', { className: 'wc-civic-job-desc' }, desc),
+    h('div', { className: 'wc-civic-job-footer' },
+      h('div', { className: 'wc-escrow-badge' },
+        h('span', { className: 'wc-escrow-icon' }, '🛡️'),
+        h('span', {}, 'Guild Escrow Assured')
       ),
-      h('div', { className: 'wc-worker-job-foot' },
-        h('div', { className: 'wc-rate-badge' },
-          h('strong', {}, formatMoney(rateHourly)),
-          h('small', {}, '/ hr')
-        ),
-        h('span', { className: 'wc-job-open-link' }, 'Details →')
+      h('div', { className: 'wc-job-btn-group' },
+        Button({
+          label: 'Details',
+          variant: 'ghost',
+          className: 'wc-job-details-btn',
+          onClick: onOpen
+        }),
+        Button({
+          label: 'Claim Job',
+          variant: 'primary',
+          className: 'wc-job-claim-btn',
+          onClick: onOpen
+        })
       )
     )
   );
 }
+
 
 /**
  * Job Detail Bottom Sheet for Worker

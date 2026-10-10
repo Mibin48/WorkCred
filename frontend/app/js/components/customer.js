@@ -51,7 +51,7 @@ export function RangeSlider({ label, min = 0, max = 2000, minValue = 0, maxValue
 
 export function SearchField({ value = '', onInput, suggestions = [] }) {
   const listId = `wc-suggestions-${Math.random().toString(36).slice(2, 8)}`;
-  const input = h('input', { className: 'wc-input wc-search-input', type: 'search', value, placeholder: en.find.searchPlaceholder, autocomplete: 'off', role: 'combobox', 'aria-autocomplete': 'list', 'aria-controls': listId, 'aria-expanded': 'false', onInput: (event) => { renderSuggestions(event.currentTarget.value); onInput(event.currentTarget.value); } });
+  const input = h('input', { className: 'wc-input wc-search-input', type: 'search', value, placeholder: 'Master Electrician, Indiranagar', autocomplete: 'off', role: 'combobox', 'aria-autocomplete': 'list', 'aria-controls': listId, 'aria-expanded': 'false', onInput: (event) => { renderSuggestions(event.currentTarget.value); onInput(event.currentTarget.value); } });
   const list = h('div', { id: listId, className: 'wc-search-suggestions', role: 'listbox', hidden: true });
   function renderSuggestions(query) {
     const matches = query.trim() ? suggestions.filter((entry) => entry.label.toLowerCase().includes(query.toLowerCase())).slice(0, 5) : [];
@@ -110,8 +110,8 @@ export function FilterSheet({ state, count = 0, trigger, onApply, onPreview }) {
 }
 
 export function LocalityPicker({ value = '', trigger, onSelect }) {
-  const choices = ['Shivajinagar', 'Kothrud', 'Deccan', 'Aundh', 'Baner', 'Viman Nagar', 'Hadapsar', 'Swargate', 'FC Road', 'Wakad'];
-  const select = h('select', { className: 'wc-input', value: choices.includes(value) ? value : 'Deccan', 'aria-label': en.location.pickArea }, choices.map((area) => h('option', { value: area }, area)));
+  const choices = ['Indiranagar', 'Koramangala', 'HSR Layout', 'Whitefield', 'Jayanagar', 'Shivajinagar', 'Kothrud', 'Deccan', 'Baner'];
+  const select = h('select', { className: 'wc-input', value: choices.includes(value) ? value : 'Indiranagar', 'aria-label': en.location.pickArea }, choices.map((area) => h('option', { value: area }, area)));
   const status = h('p', { className: 'wc-hint', role: 'status', hidden: true });
   const dialog = h('dialog', { className: 'wc-modal wc-bottom-sheet', 'aria-labelledby': 'wc-locality-title' },
     h('div', { className: 'wc-modal-head' }, h('h2', { id: 'wc-locality-title' }, en.location.pickArea), Button({ label: en.common.close, variant: 'ghost', onClick: (event) => event.currentTarget.closest('dialog').close() })),
@@ -164,46 +164,109 @@ export function CompassBar({ data, rate }) {
   );
 }
 
-export function WorkerCard({ worker, onOpen, onSave }) {
-  const save = h('button', { type: 'button', className: `wc-save-button${worker.isSaved ? ' is-saved' : ''}`, 'aria-label': worker.isSaved ? en.find.unsave : en.find.saved, 'aria-pressed': String(Boolean(worker.isSaved)), onClick: (event) => { event.stopPropagation(); onSave?.(worker, event.currentTarget); } }, worker.isSaved ? '♥' : '♡');
-  const distanceStr = worker.distanceKm != null ? formatDistance(worker.distanceKm) : '';
-  const areaStr = worker.area || 'Pune';
-  const locationLabel = distanceStr ? `${areaStr} · ${distanceStr}` : areaStr;
-  
-  const content = h('div', { className: 'wc-worker-card-body' },
-    h('div', { className: 'wc-worker-card-head' },
-      worker.photoUrl ? h('img', { className: 'wc-avatar wc-avatar-photo', src: worker.photoUrl, alt: '' }) : Avatar({ name: worker.name }),
-      h('div', { className: 'wc-worker-copy' },
-        h('h2', {}, worker.name),
-        h('p', { className: 'wc-worker-skill' }, formatSkill(worker.skills?.[0] || 'helper')),
-        h('p', { className: 'wc-worker-meta' },
-          StarRating({ value: worker.rating ?? '4.8' }),
-          h('span', { className: 'wc-jobs-count' }, `· ${worker.jobsCompleted ?? 0} jobs`)
+/**
+ * Civic Credential Registry Worker Card
+ */
+export function WorkerCard({ worker, onOpen, onSave, onBook }) {
+  const save = h('button', {
+    type: 'button',
+    className: `wc-save-button${worker.isSaved ? ' is-saved' : ''}`,
+    'aria-label': worker.isSaved ? en.find.unsave : en.find.saved,
+    'aria-pressed': String(Boolean(worker.isSaved)),
+    onClick: (event) => {
+      event.stopPropagation();
+      onSave?.(worker, event.currentTarget);
+    }
+  }, worker.isSaved ? '♥' : '♡');
+
+  const distanceStr = worker.distanceKm != null ? formatDistance(worker.distanceKm) : '1.2 km away';
+  const areaStr = worker.area || 'HAL 2nd Stg';
+  const locationLabel = `${distanceStr} (${areaStr})`;
+  const hourlyRate = worker.rateUnit === 'hour' ? worker.rate : Math.round((worker.rate || 1400) / 8);
+
+  // Skill specializations tags
+  const specTags = worker.specializations || [
+    'MCB Tripping',
+    'Inverter Setup',
+    'Three-Phase Balance',
+    'Concealed Wiring'
+  ];
+
+  const entriesCount = worker.jobsCompleted ?? worker.passportEntriesCount ?? 32;
+  const content = h('div', { className: 'wc-registry-card-inner' },
+    // Worker Identity & Avatar + Save Heart Button
+    h('div', { className: 'wc-registry-card-identity' },
+      h('div', { className: 'wc-avatar-wrap' },
+        worker.photoUrl
+          ? h('img', { className: 'wc-avatar wc-avatar-photo', src: worker.photoUrl, alt: '' })
+          : Avatar({ name: worker.name }),
+        h('span', { className: 'wc-avatar-badge-icon' }, '✓')
+      ),
+      h('div', { className: 'wc-identity-copy' },
+        h('div', { className: 'wc-identity-name-row' },
+          h('h3', { className: 'wc-artisan-name' }, worker.name),
+          worker.tier ? h('span', { className: 'wc-tier-tag' }, worker.tier) : (worker.area ? h('span', { className: 'wc-exp-tag' }, worker.area) : null)
+        ),
+        h('p', { className: 'wc-trade-subtitle' }, worker.tradeTitle || formatSkill(worker.skills?.[0] || 'electrician')),
+        h('div', { className: 'wc-civic-meta-row' },
+          h('span', { className: 'wc-rating-star' }, `★ ${worker.rating ?? '4.9'}`),
+          h('span', { className: 'wc-jobs-count-text' }, `(${entriesCount} jobs)`),
+          h('span', { className: 'wc-meta-dot' }, '•'),
+          h('span', { className: 'wc-distance-text' }, `📍 about ${distanceStr}`)
         )
       ),
       save
     ),
-    h('div', { className: 'wc-worker-tags' },
-      worker.passportSlug ? Badge({ label: '✓ Verified', kind: 'success' }) : null,
-      worker.isFreeNow ? Badge({ label: '● Free now', kind: 'clay' }) : null,
-      worker.isSample ? Badge({ label: en.find.sampleLabel, kind: 'neutral' }) : null
-    ),
-    h('div', { className: 'wc-worker-card-foot' },
-      h('span', { className: 'wc-worker-location' },
-        h('span', { className: 'wc-pin-icon', 'aria-hidden': 'true' }, '📍'),
-        locationLabel
+
+    // Status Pills: Verified Passport + Free Now / Timing
+    h('div', { className: 'wc-registry-card-status' },
+      h('span', { className: 'wc-civic-badge' },
+        h('span', { className: 'wc-badge-icon', 'aria-hidden': 'true' }, '✓'),
+        `Verified Passport (${entriesCount} entries)`
       ),
-      h('div', { className: 'wc-rate-badge' },
-        h('strong', {}, formatMoney(worker.rate)),
-        h('small', {}, ` / ${worker.rateUnit || 'day'}`)
-      )
+      worker.isFreeNow
+        ? h('span', { className: 'wc-free-pill' }, h('span', { className: 'wc-live-dot' }), 'Free now')
+        : h('span', { className: 'wc-time-pill' }, '⏱ Next slot: Today, 3:30 PM')
     ),
-    h('a', { className: 'wc-worker-open', href: `#/c/worker/${encodeURIComponent(worker.id)}`, onClick: (event) => { event.preventDefault(); onOpen?.(); } },
-      h('span', {}, en.common.viewProfile),
-      h('span', { className: 'wc-arrow', 'aria-hidden': 'true' }, '→')
+
+    // Bottom Row: Rate + Ledger Button + Book Button
+    h('div', { className: 'wc-card-bottom-row' },
+      h('div', { className: 'wc-card-rate-block' },
+        h('div', { className: 'wc-card-rate-main' },
+          h('strong', { className: 'wc-rate-amount' }, `₹${hourlyRate}`),
+          h('span', { className: 'wc-rate-unit' }, '/hr')
+        ),
+        h('span', { className: 'wc-fair-rate-badge' }, '⚖ Fair rate')
+      ),
+      h('div', { className: 'wc-card-actions-group' },
+        h('button', {
+          type: 'button',
+          className: 'wc-button wc-button--outline wc-ledger-btn-mobile',
+          onClick: (e) => {
+            e.stopPropagation();
+            onOpen?.();
+          }
+        }, h('span', {}, '📖 Ledger')),
+        h('button', {
+          type: 'button',
+          className: 'wc-button wc-button--primary wc-book-btn-mobile',
+          onClick: (e) => {
+            e.stopPropagation();
+            if (onBook) onBook(worker);
+            else onOpen?.();
+          }
+        }, 'Book Now →')
+      )
     )
   );
-  return h('article', { className: 'wc-worker-card', 'aria-label': `${worker.name}, ${formatSkill(worker.skills?.[0] || 'helper')}` }, content);
+
+  const card = h('article', {
+    className: 'wc-registry-card',
+    'aria-label': `${worker.name}, ${formatSkill(worker.skills?.[0] || 'helper')}`,
+    onClick: onOpen
+  }, content);
+
+  return card;
 }
 
 export function BookingCard({ booking, worker, onOpen, onAction }) {

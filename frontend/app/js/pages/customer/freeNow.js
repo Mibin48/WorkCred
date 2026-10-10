@@ -17,10 +17,17 @@ import { compassApi } from '../../api/compass.api.js';
 import { socket } from '../../realtime/socket.js';
 import { store } from '../../store.js';
 import { formatMoney, formatSkill, friendlyError } from '../../utils/format.js';
-import { coordsFromLocality } from '../../utils/geo.js';
+import { coordinatesForLocality } from '../../utils/geo.js';
 import { SKILLS } from '/shared/constants.js';
 
 const token = () => store.get().session?.accessToken;
+
+function getLocalityCoords(locality, user) {
+  return coordinatesForLocality(locality) || {
+    lat: user?.location?.coordinates?.[1] ?? 18.5204,
+    lng: user?.location?.coordinates?.[0] ?? 73.8567,
+  };
+}
 
 export function renderCustomerFreeNow({ navigate, user, toast }) {
   let disposed = false;
@@ -153,7 +160,7 @@ export function renderCustomerFreeNow({ navigate, user, toast }) {
     errorContainer.replaceChildren();
     listContainer.replaceChildren(Skeleton({ rows: 3 }));
     try {
-      const coords = coordsFromLocality(locality);
+      const coords = getLocalityCoords(locality, user);
       const res = await radarApi.getNearbyAvailability({
         lat: coords.lat,
         lng: coords.lng,
@@ -259,7 +266,7 @@ export function renderCustomerFreeNow({ navigate, user, toast }) {
       if (disposed) return;
       if (!socket.connected) {
         try {
-          const coords = coordsFromLocality(locality);
+          const coords = getLocalityCoords(locality, user);
           const res = await radarApi.getNearbyAvailability({
             lat: coords.lat,
             lng: coords.lng,

@@ -11,7 +11,6 @@ import { WorkPostCard } from '../../components/feed.js';
 import { ConfirmSheet } from '../../components/customer.js';
 import { feedApi } from '../../api/feed.api.js';
 import { bookingsApi } from '../../api/bookings.api.js';
-import { uploadApi } from '../../api/uploads.api.js';
 import { store } from '../../store.js';
 import { formatBookingDate, formatSkill, friendlyError } from '../../utils/format.js';
 

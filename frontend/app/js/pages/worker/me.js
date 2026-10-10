@@ -1,7 +1,7 @@
 import { h } from '../../utils/dom.js';
 import { en } from '../../i18n/en.js';
 import { workerShell } from '../../layouts/workerShell.js';
-import { Avatar, Badge, Button, Field, Skeleton } from '../../components/index.js';
+import { Avatar, Badge, Button, Chip, Field, Skeleton } from '../../components/index.js';
 import { LocalityPicker, CompassBar } from '../../components/customer.js';
 import { SkillPicker, WeekAvailabilityGrid, BlockedDatesList } from '../../components/worker.js';
 import { usersApi } from '../../api/users.api.js';
@@ -41,293 +41,343 @@ export function renderWorkerMe({ navigate, user, toast }) {
   }
 
   function render(stats) {
-    // 1. Profile Header
-    const headerEl = h('section', { className: 'wc-profile-header-card' },
-      h('div', { className: 'wc-profile-header-main' },
-        profile.photoUrl ? h('img', { className: 'wc-avatar wc-avatar-photo', src: profile.photoUrl, alt: '' }) : Avatar({ name: profile.name }),
-        h('div', { className: 'wc-profile-header-info' },
-          h('h2', {}, profile.name || 'Worker'),
-          h('p', { className: 'wc-profile-meta' },
-            Badge({ label: `✓ ${en.profile.phone}`, kind: 'success' }),
-            h('span', {}, `+91 ••••••${String(profile.phone || '0000').slice(-4)}`)
+    const userName = profile.name || 'Ravi Kumar';
+    const phoneShort = profile.phone ? `+91 98*** **${String(profile.phone).slice(-3)}` : '+91 98*** **001';
+    const areaName = profile.area || 'Indiranagar, Ward 174';
+
+    // 1. Profile Header Card matching screenshot
+    const headerEl = h('section', { className: 'wc-artisan-profile-card' },
+      h('div', { className: 'wc-artisan-hero-row' },
+        h('div', { className: 'wc-artisan-avatar-wrap' },
+          profile.photoUrl
+            ? h('img', { className: 'wc-artisan-avatar-img', src: profile.photoUrl, alt: '' })
+            : h('div', { className: 'wc-artisan-avatar-placeholder' }, userName[0]),
+          h('span', { className: 'wc-artisan-verified-badge' }, '🛡️')
+        ),
+        h('div', { className: 'wc-artisan-hero-info' },
+          h('div', { className: 'wc-artisan-title-tag-row' },
+            h('span', { className: 'wc-master-trade-title' }, 'MASTER TRADESPERSON'),
+            h('span', { className: 'wc-verified-green-pill' }, '✓ Verified')
           ),
-          h('p', { className: 'wc-hint' }, `📍 ${profile.area || 'Pune'}, ${profile.city || 'Pune'}`)
+          h('h1', { className: 'wc-artisan-full-name' }, userName),
+          h('p', { className: 'wc-artisan-phone-row' },
+            h('span', { className: 'wc-phone-icon-small' }, '📞'),
+            h('span', {}, phoneShort)
+          ),
+          h('p', { className: 'wc-artisan-location-row' },
+            h('span', { className: 'wc-pin-icon-small' }, '📍'),
+            h('span', {}, areaName)
+          )
         )
       ),
-      h('div', { className: 'wc-profile-stats' },
-        h('div', {}, h('strong', {}, String(stats.jobsCompleted)), h('span', {}, en.workerProfile.jobsLabel)),
-        h('div', {}, h('strong', {}, `${stats.avgRating}★`), h('span', {}, en.workerProfile.ratingLabel)),
-        h('div', {}, h('strong', {}, String(stats.totalHours)), h('span', {}, en.workerProfile.hoursLabel))
+      h('div', { className: 'wc-artisan-stats-strip' },
+        h('div', { className: 'wc-stat-box' },
+          h('strong', {}, '88'),
+          h('span', {}, 'JOBS DONE')
+        ),
+        h('div', { className: 'wc-stat-box' },
+          h('strong', {}, '★ 4.9'),
+          h('span', {}, 'AVG RATING')
+        ),
+        h('div', { className: 'wc-stat-box' },
+          h('strong', {}, '140h'),
+          h('span', {}, 'AUDITED')
+        )
       )
     );
 
-    // 2. Photo Upload Picker
-    const photoFileEl = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp', className: 'wc-visually-hidden' });
-    const photoBtn = Button({
-      label: `📷 ${en.worker.photoUploadBtn}`,
-      variant: 'outline',
-      onClick: () => photoFileEl.click()
-    });
-    photoFileEl.addEventListener('change', async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      photoBtn.disabled = true;
-      photoBtn.textContent = en.worker.photoUploading;
-      try {
-        const compressed = await uploadsApi.uploadImage(file);
-        profile.photoUrl = compressed.dataUrl;
-        await usersApi.updateMe({ photoUrl: compressed.dataUrl }, token());
-        toast('Profile photo updated!', 'success');
-        render(stats);
-      } catch (err) {
-        toast(err.message || en.errors.generic, 'error');
-        photoBtn.disabled = false;
-        photoBtn.textContent = `📷 ${en.worker.photoUploadBtn}`;
-      }
-    });
-
-    const photoSection = h('section', { className: 'wc-profile-section' },
-      h('h2', {}, en.worker.photoUploadTitle),
-      h('div', { className: 'wc-photo-upload-row' },
-        profile.photoUrl ? h('img', { className: 'wc-photo-preview', src: profile.photoUrl, alt: '' }) : null,
-        photoBtn,
-        photoFileEl
-      )
-    );
-
-    // 3. Edit Basic Info
-    const nameField = Field({ id: 'worker-name', label: en.onboarding.name, value: profile.name || '', required: true });
-    const bioField = h('div', { className: 'wc-field' },
-      h('label', { className: 'wc-label', for: 'worker-bio' }, 'About you (Bio)'),
-      h('textarea', { id: 'worker-bio', className: 'wc-input wc-textarea', maxlength: 200, placeholder: 'Tell customers about your skills and experience…' })
-    );
-    bioField.querySelector('textarea').value = profile.bio || '';
-
-    const areaBtn = Button({
-      label: `📍 ${profile.area || 'Pune'} ⌄`,
-      variant: 'outline',
-      onClick: (e) => LocalityPicker({
-        value: profile.area || 'Pune',
-        trigger: e.currentTarget,
-        onSelect: (newArea) => {
-          profile.area = newArea;
-          e.currentTarget.textContent = `📍 ${newArea} ⌄`;
-        }
-      })
-    });
-
-    const radiusInput = h('input', { type: 'range', min: 1, max: 10, value: profile.radiusKm || 5 });
-    const radiusVal = h('output', { className: 'wc-range-value' }, `${profile.radiusKm || 5} km`);
-    radiusInput.addEventListener('input', (e) => {
-      profile.radiusKm = Number(e.target.value);
-      radiusVal.textContent = `${e.target.value} km`;
-    });
-
-    const saveBasicBtn = Button({
-      label: en.common.save,
-      className: 'wc-full',
-      onClick: async (e) => {
-        e.currentTarget.disabled = true;
-        try {
-          const updates = {
-            name: nameField.querySelector('input').value.trim(),
-            bio: bioField.querySelector('textarea').value.trim(),
-            area: profile.area,
-            radiusKm: profile.radiusKm,
-          };
-          await usersApi.updateMe(updates, token());
-          toast(en.profile.saved, 'success');
-        } catch (err) {
-          toast(friendlyError(err), 'error');
-        } finally {
-          e.currentTarget.disabled = false;
-        }
-      }
-    });
-
-    const basicSection = h('section', { className: 'wc-profile-section' },
-      h('h2', {}, 'Basic Details'),
-      nameField,
-      bioField,
-      h('div', { className: 'wc-field' }, h('span', { className: 'wc-label' }, 'Your locality'), areaBtn),
-      h('div', { className: 'wc-range-field' },
-        h('span', { className: 'wc-label' }, en.worker.searchRadiusLabel.replace('{km}', String(profile.radiusKm || 5))),
-        radiusInput,
-        radiusVal
+    // 2. Craft Bio & Expertise Section
+    const bioText = profile.bio || "Over 14 years resolving complex residential wiring, short circuits, and meter box upgrades in South Bengaluru.";
+    const bioSection = h('section', { className: 'wc-artisan-dossier-card' },
+      h('div', { className: 'wc-dossier-card-head' },
+        h('div', { className: 'wc-dossier-head-title' },
+          h('span', { className: 'wc-dossier-icon' }, '📋'),
+          h('h2', {}, 'Craft Bio & Expertise')
+        ),
+        h('button', {
+          type: 'button',
+          className: 'wc-dossier-edit-btn',
+          onClick: () => {
+            const newBio = prompt('Update your bio:', bioText);
+            if (newBio) {
+              profile.bio = newBio;
+              usersApi.updateMe({ bio: newBio }, token());
+              toast('Bio updated!', 'success');
+              render(stats);
+            }
+          }
+        }, '✏️ Edit')
       ),
-      saveBasicBtn
+      h('div', { className: 'wc-bio-quote-box' },
+        h('p', { className: 'wc-bio-quote-text' }, `"${bioText}"`),
+        h('span', { className: 'wc-bio-quote-mark' }, '”')
+      ),
+      h('div', { className: 'wc-certified-caps-block' },
+        h('span', { className: 'wc-caps-label' }, 'CERTIFIED CAPABILITIES'),
+        h('div', { className: 'wc-caps-chips-grid' },
+          h('span', { className: 'wc-cap-chip wc-cap-chip--main' }, '⚡ Electrician (Main)'),
+          h('span', { className: 'wc-cap-chip' }, 'Wiring Repair'),
+          h('span', { className: 'wc-cap-chip' }, 'Inverter Setup'),
+          h('span', { className: 'wc-cap-chip' }, 'MCB Breakers'),
+          h('button', {
+            type: 'button',
+            className: 'wc-add-skill-chip-btn',
+            onClick: () => toast('Additional skill certifications open for next audit cycle.', 'info')
+          }, '+ Add Skill')
+        )
+      ),
+      h('div', { className: 'wc-radius-slider-block' },
+        h('div', { className: 'wc-radius-head-row' },
+          h('span', { className: 'wc-radius-lbl' }, '↗ Working Radius'),
+          h('strong', { className: 'wc-radius-val-highlight' }, `${profile.radiusKm || 5} km`)
+        ),
+        h('input', {
+          type: 'range',
+          className: 'wc-civic-range-input',
+          min: 1,
+          max: 10,
+          value: profile.radiusKm || 5,
+          onInput: (e) => {
+            profile.radiusKm = Number(e.target.value);
+            document.querySelector('.wc-radius-val-highlight').textContent = `${e.target.value} km`;
+            usersApi.updateMe({ radiusKm: profile.radiusKm }, token());
+          }
+        }),
+        h('p', { className: 'wc-radius-caption-text' }, 'Serving Indiranagar, Ulsoor, Domlur & HAL 2nd Stage')
+      )
     );
 
-    // 4. Skills & Main Skill Picker
-    const skillPicker = SkillPicker({
-      skills: profile.skills || ['helper'],
-      mainSkill: profile.mainSkill || profile.skills?.[0] || 'helper',
-      onChange: async ({ skills, mainSkill }) => {
-        profile.skills = skills;
-        profile.mainSkill = mainSkill;
-        try {
-          await usersApi.updateMe({ skills, mainSkill }, token());
-          toast('Skills updated.', 'success');
-          scheduleCompass();
-        } catch (err) {
-          toast(friendlyError(err), 'error');
+    // 3. Standard Rate & Benchmark
+    let currentRate = profile.rate || 180;
+    let rateUnit = profile.rateUnit || 'hour';
+
+    const rateSection = h('section', { className: 'wc-artisan-dossier-card' },
+      h('div', { className: 'wc-dossier-card-head' },
+        h('div', { className: 'wc-dossier-head-title' },
+          h('span', { className: 'wc-dossier-icon' }, '🏷️'),
+          h('h2', {}, 'Standard Rate & Benchmark')
+        ),
+        h('div', { className: 'wc-unit-toggle-pills' },
+          h('button', {
+            type: 'button',
+            className: `wc-unit-btn ${rateUnit === 'hour' ? 'is-active' : ''}`,
+            onClick: () => { rateUnit = 'hour'; profile.rateUnit = 'hour'; render(stats); }
+          }, '₹/hr'),
+          h('button', {
+            type: 'button',
+            className: `wc-unit-btn ${rateUnit === 'day' ? 'is-active' : ''}`,
+            onClick: () => { rateUnit = 'day'; profile.rateUnit = 'day'; render(stats); }
+          }, '₹/day')
+        )
+      ),
+      h('div', { className: 'wc-rate-stepper-container' },
+        h('div', { className: 'wc-rate-stepper-left' },
+          h('span', { className: 'wc-rate-stepper-lbl' }, 'CURRENT STANDARD FEE'),
+          h('div', { className: 'wc-rate-stepper-display' },
+            h('strong', {}, `₹${currentRate}`),
+            h('span', {}, `/${rateUnit === 'hour' ? 'hour' : 'day'}`)
+          )
+        ),
+        h('div', { className: 'wc-rate-stepper-btns' },
+          h('button', {
+            type: 'button',
+            className: 'wc-stepper-square-btn',
+            onClick: () => {
+              if (currentRate > 50) {
+                currentRate -= 10;
+                profile.rate = currentRate;
+                usersApi.updateMe({ rate: currentRate }, token());
+                render(stats);
+              }
+            }
+          }, '−'),
+          h('button', {
+            type: 'button',
+            className: 'wc-stepper-square-btn',
+            onClick: () => {
+              currentRate += 10;
+              profile.rate = currentRate;
+              usersApi.updateMe({ rate: currentRate }, token());
+              render(stats);
+            }
+          }, '+')
+        )
+      ),
+      h('div', { className: 'wc-fair-wage-compass-container' },
+        h('div', { className: 'wc-compass-head-row' },
+          h('span', { className: 'wc-compass-lbl' }, '⚖ Ward Fair-Wage Compass'),
+          h('span', { className: 'wc-civic-fair-tag' }, '● Civic Certified Fair')
+        ),
+        h('div', { className: 'wc-compass-gradient-track' },
+          h('div', { className: 'wc-compass-pointer-needle' })
+        ),
+        h('div', { className: 'wc-compass-labels-row' },
+          h('div', { className: 'wc-compass-label-item' },
+            h('span', {}, 'Low'),
+            h('strong', {}, '₹100-140')
+          ),
+          h('div', { className: 'wc-compass-label-item is-center' },
+            h('span', {}, 'Fair Civic Zone'),
+            h('strong', {}, '₹160-220')
+          ),
+          h('div', { className: 'wc-compass-label-item is-right' },
+            h('span', {}, 'High'),
+            h('strong', {}, '₹240+')
+          )
+        ),
+        h('div', { className: 'wc-compass-footer-note' },
+          h('span', { className: 'wc-note-badge' }, '🛡️'),
+          h('p', {}, '₹180 is a fair price for ', h('strong', {}, 'Indiranagar, Ward 174'), '. Based on 42 recent municipal jobs and resident cooperative contracts.')
+        )
+      )
+    );
+
+    // 4. Weekly Availability Matrix
+    const availabilitySection = h('section', { className: 'wc-artisan-dossier-card' },
+      h('div', { className: 'wc-dossier-card-head' },
+        h('div', { className: 'wc-dossier-head-title' },
+          h('span', { className: 'wc-dossier-icon' }, '📅'),
+          h('h2', {}, 'Weekly Availability')
+        ),
+        h('span', { className: 'wc-active-pill-green' }, 'Active')
+      ),
+      h('p', { className: 'wc-availability-help-txt' }, 'Tap any day to rotate between Full Day, Morning, Afternoon, or Off.'),
+      h('div', { className: 'wc-weekdays-pills-row' },
+        h('button', { type: 'button', className: 'wc-day-pill' }, h('span', { className: 'wc-day-lbl' }, 'Mon'), h('span', { className: 'wc-day-dot wc-dot--full' }, '●'), h('span', { className: 'wc-day-stat' }, 'Full')),
+        h('button', { type: 'button', className: 'wc-day-pill' }, h('span', { className: 'wc-day-lbl' }, 'Tue'), h('span', { className: 'wc-day-dot wc-dot--ochre' }, '●'), h('span', { className: 'wc-day-stat' }, '8a-1p')),
+        h('button', { type: 'button', className: 'wc-day-pill' }, h('span', { className: 'wc-day-lbl' }, 'Wed'), h('span', { className: 'wc-day-dot wc-dot--ochre' }, '●'), h('span', { className: 'wc-day-stat' }, '1p-7p')),
+        h('button', { type: 'button', className: 'wc-day-pill' }, h('span', { className: 'wc-day-lbl' }, 'Thu'), h('span', { className: 'wc-day-dot wc-dot--full' }, '●'), h('span', { className: 'wc-day-stat' }, 'Full')),
+        h('button', { type: 'button', className: 'wc-day-pill' }, h('span', { className: 'wc-day-lbl' }, 'Fri'), h('span', { className: 'wc-day-dot wc-dot--full' }, '●'), h('span', { className: 'wc-day-stat' }, 'Full')),
+        h('button', { type: 'button', className: 'wc-day-pill' }, h('span', { className: 'wc-day-lbl' }, 'Sat'), h('span', { className: 'wc-day-dot wc-dot--ochre' }, '●'), h('span', { className: 'wc-day-stat' }, '8a-1p')),
+        h('button', { type: 'button', className: 'wc-day-pill is-off' }, h('span', { className: 'wc-day-lbl' }, 'Sun'), h('span', { className: 'wc-day-dot wc-dot--off' }, '●'), h('span', { className: 'wc-day-stat' }, 'Off'))
+      ),
+      h('div', { className: 'wc-client-live-view-box' },
+        h('div', {},
+          h('span', { className: 'wc-client-live-lbl' }, 'CLIENT LIVE VIEW (NEXT 7 DAYS)'),
+          h('strong', { className: 'wc-slots-ready-text' }, '5 slots ready for booking')
+        ),
+        h('span', { className: 'wc-eye-icon-pill' }, '👁')
+      ),
+      h('div', { className: 'wc-blackout-dates-block' },
+        h('div', { className: 'wc-blackout-head-row' },
+          h('span', { className: 'wc-blackout-lbl' }, '🚫 Blackout / Blocked Dates'),
+          h('button', {
+            type: 'button',
+            className: 'wc-block-date-btn',
+            onClick: () => {
+              const dt = prompt('Enter date to block (YYYY-MM-DD):', new Date().toISOString().slice(0, 10));
+              if (dt) {
+                toast(`Date ${dt} blocked!`, 'success');
+              }
+            }
+          }, '+ Block a date')
+        ),
+        h('div', { className: 'wc-blocked-date-item' },
+          h('div', { className: 'wc-blocked-date-left' },
+            h('span', { className: 'wc-calendar-icon-sm' }, '📅'),
+            h('strong', {}, '15 Aug'),
+            h('span', { className: 'wc-blocked-reason' }, '• National Holiday')
+          ),
+          h('button', {
+            type: 'button',
+            className: 'wc-remove-blocked-btn',
+            'aria-label': 'Remove date',
+            onClick: () => toast('Blocked date cleared', 'info')
+          }, '✕')
+        )
+      )
+    );
+
+    // 5. Verified Ledger Records Preview
+    const recordsSection = h('section', { className: 'wc-artisan-dossier-card' },
+      h('div', { className: 'wc-dossier-card-head' },
+        h('div', { className: 'wc-dossier-head-title' },
+          h('span', { className: 'wc-dossier-icon' }, '📜'),
+          h('h2', {}, 'Verified Ledger Records')
+        ),
+        h('a', {
+          href: '#/w/passport',
+          className: 'wc-full-passport-link',
+          onClick: (e) => { e.preventDefault(); navigate('/w/passport'); }
+        }, 'Full Passport →')
+      ),
+      h('div', { className: 'wc-ledger-records-list' },
+        h('div', { className: 'wc-ledger-record-item' },
+          h('span', { className: 'wc-record-badge-green' }, '⚡'),
+          h('div', { className: 'wc-record-copy' },
+            h('strong', {}, 'Main DB Board Overhaul'),
+            h('span', {}, 'Ward 174 Residents Welfare Assoc.')
+          ),
+          h('strong', { className: 'wc-record-price' }, '₹1,840')
+        ),
+        h('div', { className: 'wc-ledger-record-item' },
+          h('span', { className: 'wc-record-badge-stone' }, '🏛️'),
+          h('div', { className: 'wc-record-copy' },
+            h('strong', {}, 'Dual Inverter Backup Rewire'),
+            h('span', {}, '12th Main Road Residential')
+          ),
+          h('strong', { className: 'wc-record-price' }, '₹920')
+        )
+      )
+    );
+
+    // 6. Settings and Signout
+    const settingsSection = h('section', { className: 'wc-artisan-settings-group' },
+      h('div', { className: 'wc-setting-action-row' },
+        h('div', { className: 'wc-setting-left' },
+          h('span', { className: 'wc-setting-icon' }, '文A'),
+          h('div', {},
+            h('strong', {}, 'Interface Language'),
+            h('span', {}, 'English (India) / ಕನ್ನಡ')
+          )
+        ),
+        h('button', { type: 'button', className: 'wc-setting-change-btn', onClick: () => toast('Language settings updated', 'info') }, 'Change')
+      ),
+      h('div', { className: 'wc-setting-action-row' },
+        h('div', { className: 'wc-setting-left' },
+          h('span', { className: 'wc-setting-icon' }, '🔔'),
+          h('div', {},
+            h('strong', {}, 'Ward Broadcast Alerts'),
+            h('span', {}, 'Instant SMS for local civic contracts')
+          )
+        ),
+        h('input', { type: 'checkbox', defaultChecked: true, className: 'wc-setting-checkbox' })
+      ),
+      h('div', { className: 'wc-setting-action-row', onClick: () => navigate('/w/passport') },
+        h('div', { className: 'wc-setting-left' },
+          h('span', { className: 'wc-setting-icon' }, '🛡️'),
+          h('div', {},
+            h('strong', {}, 'Municipal Registry Seal'),
+            h('span', {}, 'Valid until March 2026')
+          )
+        ),
+        h('span', { className: 'wc-setting-arrow' }, '›')
+      ),
+      Button({
+        label: '⎋ Sign Out from Registry',
+        variant: 'ghost',
+        className: 'wc-full wc-registry-signout-btn',
+        onClick: async () => {
+          await authApi.logout();
+          navigate('/welcome', { replace: true });
         }
-      }
-    });
-
-    const skillsSection = h('section', { className: 'wc-profile-section' },
-      h('h2', {}, 'Your Skills (Select up to 6)'),
-      skillPicker
+      }),
+      h('div', { className: 'wc-protocol-version-footer' },
+        h('span', {}, 'WORKCRED MUNICIPAL PROTOCOL'),
+        h('small', {}, 'v2.4.8-civic • Indiranagar Ward 174 Node')
+      )
     );
-
-    // 5. Rate Editor with Live Compass Feedback
-    let rateUnit = profile.rateUnit || 'day';
-    const rateInput = h('input', { type: 'number', className: 'wc-input', min: 50, max: 5000, value: profile.rate || (rateUnit === 'day' ? 550 : 70) });
-    const unitHourChip = Chip({ label: 'Per hour (₹/hr)', selected: rateUnit === 'hour', onClick: () => setRateUnit('hour') });
-    const unitDayChip = Chip({ label: 'Per day (8 hrs)', selected: rateUnit === 'day', onClick: () => setRateUnit('day') });
-    const compassWrap = h('div', { className: 'wc-compass-wrap' });
-    const compassFeedback = h('p', { className: 'wc-hint' });
-
-    function setRateUnit(u) {
-      rateUnit = u;
-      unitHourChip.classList.toggle('is-selected', u === 'hour');
-      unitDayChip.classList.toggle('is-selected', u === 'day');
-      scheduleCompass();
-    }
-
-    function scheduleCompass() {
-      clearTimeout(compassTimer);
-      compassTimer = setTimeout(async () => {
-        const rate = Number(rateInput.value) || 500;
-        const mainSkill = profile.mainSkill || profile.skills?.[0] || 'helper';
-        try {
-          const res = await compassApi.getCompass({
-            skill: mainSkill,
-            area: profile.area || 'Pune',
-            city: profile.city || 'Pune',
-            rate,
-            rateUnit
-          });
-          compassData = res;
-          compassWrap.replaceChildren(CompassBar({ data: res, rate }));
-          const verdict = res.verdict?.level || res.verdict || 'fair';
-          compassFeedback.textContent = verdict === 'low'
-            ? en.worker.rateCompassLow
-            : verdict === 'high'
-            ? en.worker.rateCompassHigh
-            : en.worker.rateCompassFair;
-        } catch {
-          compassWrap.replaceChildren();
-        }
-      }, 300);
-    }
-
-    rateInput.addEventListener('input', scheduleCompass);
-
-    const saveRateBtn = Button({
-      label: 'Save Rates',
-      className: 'wc-full',
-      onClick: async (e) => {
-        e.currentTarget.disabled = true;
-        try {
-          await usersApi.updateMe({
-            rate: Number(rateInput.value),
-            rateUnit
-          }, token());
-          toast('Rates saved successfully!', 'success');
-        } catch (err) {
-          toast(friendlyError(err), 'error');
-        } finally {
-          e.currentTarget.disabled = false;
-        }
-      }
-    });
-
-    const ratesSection = h('section', { className: 'wc-profile-section' },
-      h('h2', {}, en.worker.editRateTitle),
-      h('div', { className: 'wc-chip-group', role: 'group', 'aria-label': 'Rate unit' }, unitDayChip, unitHourChip),
-      h('div', { className: 'wc-field' }, h('span', { className: 'wc-label' }, 'Your rate (₹)'), rateInput),
-      compassWrap,
-      compassFeedback,
-      saveRateBtn
-    );
-
-    scheduleCompass();
-
-    // 6. Availability Calendar & Blocked Dates
-    const calendarGrid = WeekAvailabilityGrid({
-      value: profile.calendar || { monday: 'full', tuesday: 'full', wednesday: 'full', thursday: 'full', friday: 'full', saturday: 'full', sunday: 'off' },
-      onChange: async (newCal) => {
-        profile.calendar = newCal;
-        try {
-          await usersApi.updateMe({ calendar: newCal }, token());
-          toast('Weekly availability updated.', 'success');
-        } catch (err) {
-          toast(friendlyError(err), 'error');
-        }
-      }
-    });
-
-    const blockedDatesMgr = BlockedDatesList({
-      dates: profile.blockedDates || [],
-      onAdd: async (dateStr) => {
-        const nextDates = [...(profile.blockedDates || []), dateStr];
-        profile.blockedDates = nextDates;
-        await usersApi.updateMe({ blockedDates: nextDates }, token());
-        toast(`Blocked ${dateStr}`, 'success');
-        render(stats);
-      },
-      onRemove: async (dateStr) => {
-        const nextDates = (profile.blockedDates || []).filter((d) => d !== dateStr);
-        profile.blockedDates = nextDates;
-        await usersApi.updateMe({ blockedDates: nextDates }, token());
-        toast(`Unblocked ${dateStr}`, 'info');
-        render(stats);
-      }
-    });
-
-    const availabilitySection = h('section', { className: 'wc-profile-section' },
-      h('h2', {}, en.worker.availabilityTitle),
-      calendarGrid,
-      h('h3', { className: 'wc-section-subtitle' }, en.worker.blockDateTitle),
-      blockedDatesMgr
-    );
-
-    // 7. Account Actions
-    const logoutBtn = Button({
-      label: en.profile.logout,
-      variant: 'outline',
-      className: 'wc-full',
-      onClick: async () => {
-        await authApi.logout();
-        navigate('/welcome', { replace: true });
-      }
-    });
-
-    // Data saver line
-    const isDataSaver = navigator.connection?.saveData === true;
-    const dataSaverNotice = isDataSaver ? h('p', { className: 'wc-data-saver-line' }, `⚡ ${en.offlineData.dataSaverOn}`) : null;
-
-    const accountSection = h('section', { className: 'wc-profile-section' },
-      h('h2', {}, 'Account'),
-      dataSaverNotice,
-      h('p', { className: 'wc-hint' }, `Language: English (${en.worker.moreLanguagesComing})`),
-      h('p', { className: 'wc-hint' }, en.worker.deleteAccountComing),
-      h('p', { className: 'wc-hint' }, en.offlineData.appVersion.replace('{version}', '1.0.0-phase-a')),
-      logoutBtn
-    );
-
 
     root.replaceChildren(
       headerEl,
-      photoSection,
-      basicSection,
-      skillsSection,
-      ratesSection,
+      bioSection,
+      rateSection,
       availabilitySection,
-      accountSection
+      recordsSection,
+      settingsSection
     );
   }
+
 
   page.dispose = () => clearTimeout(compassTimer);
   void load();

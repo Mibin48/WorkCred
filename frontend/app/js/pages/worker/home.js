@@ -25,39 +25,54 @@ export function renderWorkerHome({ navigate, user, toast }) {
 
   // Time-of-day greeting
   const hour = new Date().getHours();
-  const firstName = (user.name || 'Worker').split(' ')[0];
+  const firstName = (user.name || 'Ravi Kumar').split(' ')[0];
   const greetingText = hour < 12
-    ? en.worker.greetingMorning.replace('{name}', firstName)
+    ? `Good morning, ${firstName}`
     : hour < 17
-    ? en.worker.greetingAfternoon.replace('{name}', firstName)
-    : en.worker.greetingEvening.replace('{name}', firstName);
+    ? `Good afternoon, ${firstName}`
+    : `Good evening, ${firstName}`;
 
-  const greetingEl = h('div', { className: 'wc-worker-greeting-bar' },
-    h('div', {},
-      h('p', { className: 'wc-eyebrow' }, en.brand.tagline),
-      h('h2', { className: 'wc-page-title' }, greetingText)
+  const greetingEl = h('div', { className: 'wc-worker-header-block' },
+    h('div', { className: 'wc-worker-guild-row' },
+      h('span', { className: 'wc-guild-id-badge' }, 'VERIFIED CIVIC GUILD • ID #4812'),
+      h('span', { className: 'wc-active-ledger-badge' },
+        h('span', { className: 'wc-ledger-check-icon' }, '✓'),
+        h('strong', {}, 'Active Ledger')
+      )
     ),
-    Button({
-      label: `📍 ${currentArea} ⌄`,
-      variant: 'ghost',
-      className: 'wc-locality-btn',
-      onClick: (e) => LocalityPicker({
-        value: currentArea,
-        trigger: e.currentTarget,
-        onSelect: (newArea) => {
-          currentArea = newArea;
-          greetingEl.querySelector('.wc-locality-btn').textContent = `📍 ${newArea} ⌄`;
-          void load();
-        }
-      })
-    })
+    h('h1', { className: 'wc-worker-greeting-heading' }, greetingText),
+    h('div', { className: 'wc-worker-zone-row' },
+      h('button', {
+        type: 'button',
+        className: 'wc-worker-jurisdiction-pill',
+        onClick: (e) => LocalityPicker({
+          value: currentArea,
+          trigger: e.currentTarget,
+          onSelect: (newArea) => {
+            currentArea = newArea;
+            greetingEl.querySelector('.wc-worker-jurisdiction-pill strong').textContent = `${newArea}, Ward 174 ▾`;
+            void load();
+          }
+        })
+      },
+        h('span', { className: 'wc-pin-dot' }, '📍'),
+        h('strong', {}, `${currentArea}, Ward 174 ▾`)
+      ),
+      h('span', { className: 'wc-zone-coverage-text' }, 'Zone 4 Coverage')
+    )
   );
 
   const freeNowSlot = h('div', { className: 'wc-freenow-slot' }, Skeleton({ rows: 3 }));
   const requestsSlot = h('div', { className: 'wc-requests-section' });
   const jobsSlot = h('div', { className: 'wc-jobs-section' });
 
-  root.append(greetingEl, freeNowSlot, requestsSlot, jobsSlot);
+  const charterFooter = h('div', { className: 'wc-charter-protected-banner' },
+    h('span', { className: 'wc-charter-shield' }, '🛡️'),
+    h('p', {}, 'Protected under Bengaluru Civic Trades Charter • Fair wage guaranteed')
+  );
+
+  root.append(greetingEl, freeNowSlot, requestsSlot, jobsSlot, charterFooter);
+
 
   const page = workerShell({ title: en.nav.home, active: '/w/home', navigate, user, content: root });
 
@@ -194,9 +209,12 @@ export function renderWorkerHome({ navigate, user, toast }) {
       }));
 
       requestsSlot.replaceChildren(
-        h('div', { className: 'wc-section-header' },
-          h('h3', {}, en.worker.needsAnswer),
-          h('span', { className: 'wc-badge wc-badge--clay' }, `${bookings.length} new`)
+        h('div', { className: 'wc-worker-section-header' },
+          h('div', { className: 'wc-worker-section-title-wrap' },
+            h('span', { className: 'wc-red-dot-indicator' }, '●'),
+            h('h2', { className: 'wc-worker-section-title' }, 'Needs Your Answer')
+          ),
+          h('span', { className: 'wc-pending-badge' }, `${bookings.length} Pending`)
         ),
         h('div', { className: 'wc-requests-list' }, ...requestCards)
       );
@@ -206,14 +224,6 @@ export function renderWorkerHome({ navigate, user, toast }) {
   }
 
   async function loadJobs() {
-    jobsSlot.replaceChildren(
-      h('div', { className: 'wc-section-header' },
-        h('h3', {}, en.worker.jobsNearYou),
-        Button({ label: en.worker.refresh, variant: 'ghost', onClick: loadJobs })
-      ),
-      Skeleton({ rows: 3 })
-    );
-
     try {
       const point = coordinatesForLocality(currentArea);
       const { jobs = [] } = await jobsApi.getOpenJobs({
@@ -224,12 +234,31 @@ export function renderWorkerHome({ navigate, user, toast }) {
 
       if (disposed) return;
 
+      const filterBar = h('div', { className: 'wc-jobs-filter-pills-row' },
+        h('button', { type: 'button', className: 'wc-job-filter-pill is-active' }, '⚡ My Trades (Wiring, MCB)'),
+        h('button', { type: 'button', className: 'wc-job-filter-pill' }, 'Full Day'),
+        h('button', { type: 'button', className: 'wc-job-filter-pill' }, 'Nearest first ▾')
+      );
+
+      const header = h('div', { className: 'wc-worker-jobs-header-block' },
+        h('div', { className: 'wc-jobs-title-row' },
+          h('div', {},
+            h('h2', { className: 'wc-worker-section-title' }, 'Jobs Near You'),
+            h('p', { className: 'wc-jobs-subtext' }, 'Live civic ledger opportunities')
+          ),
+          h('button', {
+            type: 'button',
+            className: 'wc-jobs-refresh-circle-btn',
+            'aria-label': 'Refresh jobs',
+            onClick: loadJobs
+          }, '🔄')
+        ),
+        filterBar
+      );
+
       if (!jobs.length) {
         jobsSlot.replaceChildren(
-          h('div', { className: 'wc-section-header' },
-            h('h3', {}, en.worker.jobsNearYou),
-            Button({ label: en.worker.refresh, variant: 'ghost', onClick: loadJobs })
-          ),
+          header,
           EmptyState({
             title: en.worker.jobsNearYou,
             body: en.worker.noJobsNearYou,
@@ -258,10 +287,7 @@ export function renderWorkerHome({ navigate, user, toast }) {
       }));
 
       jobsSlot.replaceChildren(
-        h('div', { className: 'wc-section-header' },
-          h('h3', {}, en.worker.jobsNearYou),
-          Button({ label: en.worker.refresh, variant: 'ghost', onClick: loadJobs })
-        ),
+        header,
         h('div', { className: 'wc-worker-jobs-grid' }, ...cards)
       );
     } catch (err) {
@@ -270,6 +296,7 @@ export function renderWorkerHome({ navigate, user, toast }) {
       }
     }
   }
+
 
   async function load() {
     await Promise.all([loadFreeNow(), loadRequests(), loadJobs()]);
