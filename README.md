@@ -25,8 +25,26 @@ The application will be live at **http://localhost:3000** (or `http://127.0.0.1:
 
 ### Additional Scripts
 ```bash
-# Run complete test suite (unit tests, cryptographic verification, service e2e)
+# Frontend & Shared tests
 npm test
+
+# Backend tests (against in-memory replica set)
+npm run test:backend
+
+# Run all tests
+npm run test:all
+
+# Seed MongoDB Atlas database with deterministic sample data
+npm run seed
+
+# Reset and re-seed database
+npm run seed:reset -- --yes
+
+# Sync and ensure all explicit database indexes
+npm run db:indexes
+
+# Generate strong random cryptographic secrets (JWT & AES-256-GCM)
+npm run gen:secrets
 
 # Check for stray hex colors and font-size token adherence
 npm run lint:tokens

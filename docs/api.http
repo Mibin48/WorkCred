@@ -1,0 +1,111 @@
+### WorkCred REST API - Step 10 Auth & User Profiles
+@baseUrl = http://localhost:4000/api/v1
+@appOrigin = http://localhost:3000
+
+### 1. Request OTP Code (Worker - Ravi)
+POST {{baseUrl}}/auth/otp/request
+Content-Type: application/json
+
+{
+  "phone": "9000000001"
+}
+
+### 2. Verify OTP Code (Worker - Ravi)
+# @name verifyRavi
+POST {{baseUrl}}/auth/otp/verify
+Content-Type: application/json
+
+{
+  "phone": "9000000001",
+  "code": "123456"
+}
+
+### 3. Get Private User Profile (Ravi)
+@raviToken = {{verifyRavi.response.body.data.accessToken}}
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{raviToken}}
+
+### 4. Set Initial Role (Worker)
+PATCH {{baseUrl}}/users/me/role
+Authorization: Bearer {{raviToken}}
+Content-Type: application/json
+
+{
+  "role": "worker"
+}
+
+### 5. Update Profile & Generate Passport Slug (Worker - Ravi)
+PATCH {{baseUrl}}/users/me
+Authorization: Bearer {{raviToken}}
+Content-Type: application/json
+
+{
+  "name": "Ravi Shinde",
+  "skills": ["masonry", "painting"],
+  "rate": 800,
+  "rateUnit": "day",
+  "bio": "Experienced mason with over 10 years working across Pune and PCMC.",
+  "area": "Kothrud",
+  "city": "Pune",
+  "location": {
+    "lat": 18.5074,
+    "lng": 73.8077
+  },
+  "photoUrl": "https://res.cloudinary.com/workcred/image/upload/v1/workers/ravi.jpg"
+}
+
+### 6. Refresh Session (Rotate Refresh Token)
+# Note: In browser/REST client, cookie wc_rt is sent automatically after login
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+X-Requested-With: workcred
+Origin: {{appOrigin}}
+
+### 7. Logout (Revoke Session Family)
+POST {{baseUrl}}/auth/logout
+Content-Type: application/json
+X-Requested-With: workcred
+Origin: {{appOrigin}}
+
+### 8. Request OTP Code (Customer - Meera)
+POST {{baseUrl}}/auth/otp/request
+Content-Type: application/json
+
+{
+  "phone": "9000000002"
+}
+
+### 9. Verify OTP Code (Customer - Meera)
+# @name verifyMeera
+POST {{baseUrl}}/auth/otp/verify
+Content-Type: application/json
+
+{
+  "phone": "9000000002",
+  "code": "123456"
+}
+
+### 10. Set Initial Role (Customer)
+@meeraToken = {{verifyMeera.response.body.data.accessToken}}
+PATCH {{baseUrl}}/users/me/role
+Authorization: Bearer {{meeraToken}}
+Content-Type: application/json
+
+{
+  "role": "customer"
+}
+
+### 11. Update Customer Profile (Meera)
+PATCH {{baseUrl}}/users/me
+Authorization: Bearer {{meeraToken}}
+Content-Type: application/json
+
+{
+  "name": "Meera Joshi",
+  "area": "Baner",
+  "city": "Pune",
+  "location": {
+    "lat": 18.5590,
+    "lng": 73.7868
+  }
+}
