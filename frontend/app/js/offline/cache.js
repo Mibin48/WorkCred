@@ -71,19 +71,30 @@ export function sanitizeForOffline(path, data) {
   if (!data || typeof data !== 'object') return data;
   const clone = structuredClone(data);
 
-  // Strip handshake codes from booking responses
-  if (clone.booking) {
-    delete clone.booking.startCode;
-    delete clone.booking.finishCode;
-  }
-  if (Array.isArray(clone.bookings)) {
-    clone.bookings.forEach((b) => {
-      delete b.startCode;
-      delete b.finishCode;
+  const cleanBooking = (b) => {
+    if (!b || typeof b !== 'object') return;
+    delete b.startCode;
+    delete b.finishCode;
+    delete b.workerPhone;
+    delete b.customerPhone;
+    delete b.phone;
+    if (b.location?.coordinates) {
+      delete b.location.coordinates;
+    }
+  };
+
+  // Strip handshake codes, phone numbers, and coordinates from booking responses
+  if (clone.booking) cleanBooking(clone.booking);
+  if (Array.isArray(clone.bookings)) clone.bookings.forEach(cleanBooking);
+  cleanBooking(clone);
+
+  // If workers list, strip phone numbers and exact coordinates
+  if (Array.isArray(clone.workers)) {
+    clone.workers.forEach((w) => {
+      delete w.phone;
+      if (w.location?.coordinates) delete w.location.coordinates;
     });
   }
-  if (clone.startCode) delete clone.startCode;
-  if (clone.finishCode) delete clone.finishCode;
 
   return clone;
 }

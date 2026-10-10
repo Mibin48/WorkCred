@@ -46,7 +46,7 @@ app.use(
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
         imgSrc: ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
-        connectSrc: ["'self'", config.APP_ORIGIN, 'https://res.cloudinary.com'],
+        connectSrc: ["'self'", config.APP_ORIGIN, 'https://res.cloudinary.com', 'https://api.cloudinary.com'],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: config.NODE_ENV === 'production' ? [] : null,
       },
