@@ -4,6 +4,11 @@ import { workerShell } from '../../layouts/workerShell.js';
 import { customerShell } from '../../layouts/customerShell.js';
 import { Avatar, Badge, Button, Field } from '../../components/index.js';
 
+import { getQueue, discardQueueItem, flushQueue } from '../../offline/queue.js';
+import { http } from '../../api/http.js';
+import { APP_VERSION } from '../../config.js';
+import { store } from '../../store.js';
+
 export function renderMe({ navigate, user }) {
   const worker = user.role === 'worker';
   const name = Field({ id: 'me-name', label: en.onboarding.name, required: true, value: user.name ?? '', autocomplete: 'name' });
@@ -27,7 +32,40 @@ export function renderMe({ navigate, user }) {
     try { await window.workcred.auth.logout(); navigate('/welcome', { replace: true }); }
     catch (reason) { error.textContent = reason.message || en.errors.generic; error.hidden = false; logout.disabled = false; }
   } });
-  const page = h('div', { className: 'wc-page-stack' }, h('section', { className: 'wc-profile-summary' }, Avatar({ name: user.name }), h('div', {}, h('h2', {}, user.name || en.profile.title), Badge({ label: en.profile.phone, kind: 'success' }), h('p', { className: 'wc-hint' }, `+91 ${user.phone}`))), h('section', { className: 'wc-profile-form' }, h('h2', {}, en.profile.editTitle), form, logout));
+
+  // Data saver line
+  const isDataSaver = navigator.connection?.saveData === true;
+  const dataSaverNotice = isDataSaver ? h('p', { className: 'wc-data-saver-line' }, `⚡ ${en.offlineData.dataSaverOn}`) : null;
+
+  // Offline queue section
+  const queueItems = getQueue();
+  const queueSection = queueItems.length ? h('section', { className: 'wc-card wc-queue-section' },
+    h('h3', {}, en.offlineData.notSentTitle),
+    h('ul', { className: 'wc-queue-list' }, ...queueItems.map((item) =>
+      h('li', {},
+        h('span', {}, `${item.actionType} ${item.targetName || item.targetId}`),
+        Button({ label: en.offlineData.discardQueue, variant: 'ghost', onClick: () => { discardQueueItem(item.id); navigate('/c/me'); } })
+      )
+    )),
+    Button({ label: en.offlineData.retryQueue, variant: 'outline', onClick: async () => {
+      const token = store.get().session?.accessToken;
+      await flushQueue(http, token);
+      navigate('/c/me');
+    } })
+  ) : null;
+
+  const versionLine = h('p', { className: 'wc-hint' }, en.offlineData.appVersion.replace('{version}', APP_VERSION));
+
+  const page = h('div', { className: 'wc-page-stack' },
+    h('section', { className: 'wc-profile-summary' },
+      Avatar({ name: user.name }),
+      h('div', {}, h('h2', {}, user.name || en.profile.title), Badge({ label: en.profile.phone, kind: 'success' }), h('p', { className: 'wc-hint' }, `+91 ${user.phone}`)),
+      dataSaverNotice
+    ),
+    queueSection,
+    h('section', { className: 'wc-profile-form' }, h('h2', {}, en.profile.editTitle), form, versionLine, logout)
+  );
   const shell = worker ? workerShell : customerShell;
   return shell({ title: en.nav.me, active: worker ? '/w/me' : '/c/me', navigate, user, content: page });
 }
+

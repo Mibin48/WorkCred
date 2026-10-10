@@ -27,6 +27,29 @@ export function createBooking(customerId, body) {
   const worker = db.users.find((u) => u.id === workerId && u.role === 'worker');
   if (!worker) throw new AppError('NOT_FOUND', 'Worker not found.', 404);
 
+  const scheduledAt = body.scheduledAt ? new Date(body.scheduledAt) : null;
+  const hours = Math.min(12, Math.max(1, Number(body.hours) || 1));
+  if (scheduledAt && !Number.isNaN(scheduledAt.getTime())) {
+    const requestedDateStr = scheduledAt.toISOString().slice(0, 10);
+    if (worker.blockedDates && worker.blockedDates.includes(requestedDateStr)) {
+      throw new AppError('ALREADY_BOOKED', 'This worker has marked this date as blocked in their calendar.', 409);
+    }
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayOfWeek = dayNames[scheduledAt.getDay()];
+    if (worker.calendar && worker.calendar[dayOfWeek] === 'off') {
+      throw new AppError('ALREADY_BOOKED', `This worker is off on ${dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1)}s.`, 409);
+    }
+
+    const requestedEnd = scheduledAt.getTime() + hours * 3600000;
+    const conflict = db.bookings.some((existing) => {
+      if (existing.workerId !== workerId || !existing.scheduledAt || !['pending', 'confirmed', 'in_progress'].includes(existing.status)) return false;
+      const existingStart = new Date(existing.scheduledAt).getTime();
+      const existingEnd = existingStart + (Number(existing.hours) || 1) * 3600000;
+      return scheduledAt.getTime() < existingEnd && requestedEnd > existingStart;
+    });
+    if (conflict) throw new AppError('ALREADY_BOOKED', 'This worker is already busy at that time. Please pick another time.', 409);
+  }
+
   const startCode = String(Math.floor(1000 + Math.random() * 9000));
   const finishCode = String(Math.floor(1000 + Math.random() * 9000));
   const status = source === 'job' ? 'confirmed' : 'pending';
@@ -41,6 +64,9 @@ export function createBooking(customerId, body) {
     status,
     rate: Number(rate) || worker.rate || 500,
     rateUnit: rateUnit || worker.rateUnit || 'day',
+    scheduledAt: scheduledAt && !Number.isNaN(scheduledAt.getTime()) ? scheduledAt.toISOString() : null,
+    hours,
+    note: String(body.note || '').slice(0, 200),
     startCode,
     finishCode,
     startCodeAttempts: 0,
@@ -64,6 +90,7 @@ export function confirmBooking(workerId, bookingId) {
 
   const nextStatus = transition(booking, 'confirm', 'worker');
   booking.status = nextStatus;
+  booking.confirmedAt = new Date().toISOString();
   writeDb(db);
 
   eventBus.emit(EVENT_NAMES.BOOKING_CREATED, { booking });
@@ -76,7 +103,11 @@ export function getBookings(userId, role, statusFilter) {
   if (statusFilter) {
     list = list.filter((b) => b.status === statusFilter);
   }
-  const sanitized = list.map((b) => sanitizeBookingForUser(b, userId, role));
+  const sanitized = list.map((b) => {
+    const copy = sanitizeBookingForUser(b, userId, role);
+    copy.workerName = db.users.find((user) => user.id === b.workerId)?.name || 'Worker';
+    return copy;
+  });
   return { bookings: sanitized };
 }
 
@@ -87,7 +118,13 @@ export function getBookingById(bookingId, userId, role) {
   if (booking.workerId !== userId && booking.customerId !== userId) {
     throw new AppError('FORBIDDEN', 'Access denied to this booking.', 403);
   }
-  return { booking: sanitizeBookingForUser(booking, userId, role) };
+  const sanitized = sanitizeBookingForUser(booking, userId, role);
+  sanitized.workerName = db.users.find((user) => user.id === booking.workerId)?.name || 'Worker';
+  if (role === 'customer' && ['confirmed', 'in_progress'].includes(booking.status)) {
+    const worker = db.users.find((u) => u.id === booking.workerId);
+    if (worker) sanitized.workerPhone = worker.phone;
+  }
+  return { booking: sanitized };
 }
 
 export function startBooking(workerId, bookingId, body) {
@@ -207,16 +244,39 @@ export function cancelBooking(userId, role, bookingId) {
   booking.status = nextStatus;
 
   // Penalty counter for worker cancellation
+  let penaltyMessage = null;
   if (role === 'worker') {
     const worker = db.users.find((u) => u.id === userId);
     if (worker) {
       worker.cancellationPenaltyCount = (worker.cancellationPenaltyCount || 0) + 1;
+      penaltyMessage = `You have cancelled ${worker.cancellationPenaltyCount} booking(s). Cancelling often can lower your visibility.`;
     }
   }
 
   writeDb(db);
   eventBus.emit(EVENT_NAMES.BOOKING_CANCELLED, { booking });
-  return { booking: sanitizeBookingForUser(booking, userId, role) };
+  return { booking: sanitizeBookingForUser(booking, userId, role), penaltyMessage };
+}
+
+export function reportBooking(userId, bookingId, body = {}) {
+  const db = readDb();
+  const booking = db.bookings.find((b) => b.id === bookingId);
+  if (!booking) throw new AppError('NOT_FOUND', 'Booking not found.', 404);
+  if (booking.workerId !== userId && booking.customerId !== userId) {
+    throw new AppError('FORBIDDEN', 'Access denied to this booking.', 403);
+  }
+  if (!db.reports) db.reports = [];
+  const report = {
+    id: `report-${Date.now()}`,
+    bookingId,
+    reportedBy: userId,
+    reason: body.reason || 'other',
+    note: String(body.note || '').slice(0, 300),
+    createdAt: new Date().toISOString(),
+  };
+  db.reports.push(report);
+  writeDb(db);
+  return { message: 'Problem report submitted successfully.', report };
 }
 
 export function sanitizeBookingForUser(booking, userId, role) {

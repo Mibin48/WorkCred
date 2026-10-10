@@ -150,15 +150,27 @@ export function validateAvailability(body = {}) {
 
 export function validatePostCreate(body = {}) {
   const errors = [];
-  const { skill, caption } = body;
+  const { skill, caption, afterPhotoUrl, linkedBookingId } = body;
   if (!skill || !SKILLS.includes(skill)) {
     errors.push({ field: 'skill', message: `Skill must be one of: ${SKILLS.join(', ')}.` });
   }
+  if (!afterPhotoUrl || typeof afterPhotoUrl !== 'string') {
+    errors.push({ field: 'afterPhotoUrl', message: 'An after photo is required to create a post.' });
+  }
   if (!caption || typeof caption !== 'string' || caption.trim().length < 5) {
     errors.push({ field: 'caption', message: 'Caption must be at least 5 characters long.' });
+  } else if (caption.trim().length > 140) {
+    errors.push({ field: 'caption', message: 'Caption cannot exceed 140 characters.' });
+  } else {
+    const phonePattern = /(?:\+?91[\s-]?)?[6-9]\d{9}|\b\d{5}[\s-]?\d{5}\b|\b\d{3}[\s-]?\d{3}[\s-]?\d{4}\b/;
+    const urlPattern = /(?:https?:\/\/|www\.)\S+/i;
+    if (phonePattern.test(caption) || urlPattern.test(caption)) {
+      errors.push({ field: 'caption', message: 'Please do not put phone numbers or links in a post.' });
+    }
   }
   return errors;
 }
+
 
 export function validateEndorsement(body = {}) {
   const errors = [];
@@ -171,3 +183,29 @@ export function validateEndorsement(body = {}) {
   }
   return errors;
 }
+
+export function validatePassportEntryPatch(body = {}) {
+  const errors = [];
+  const allowed = ['visibility', 'isMasked'];
+  for (const key of Object.keys(body)) {
+    if (!allowed.includes(key)) {
+      errors.push({ field: key, message: `Field '${key}' cannot be modified on passport entries.` });
+    }
+  }
+  if ('visibility' in body && !['public', 'private'].includes(body.visibility)) {
+    errors.push({ field: 'visibility', message: "Visibility must be 'public' or 'private'." });
+  }
+  if ('isMasked' in body && typeof body.isMasked !== 'boolean') {
+    errors.push({ field: 'isMasked', message: 'isMasked must be a boolean.' });
+  }
+  return errors;
+}
+
+export function validateReport(body = {}) {
+  const errors = [];
+  if (!body.reason || typeof body.reason !== 'string' || body.reason.trim().length === 0) {
+    errors.push({ field: 'reason', message: 'Reason for report is required.' });
+  }
+  return errors;
+}
+

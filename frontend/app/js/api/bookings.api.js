@@ -35,4 +35,9 @@ export const bookingsApi = {
     const result = await http.post(`/bookings/${bookingId}/cancel`, {}, { token });
     return unwrap(result);
   },
+
+  async reportBooking(bookingId, body, token) {
+    const result = await http.post(`/bookings/${bookingId}/report`, body, { token });
+    return unwrap(result);
+  },
 };

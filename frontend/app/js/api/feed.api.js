@@ -26,8 +26,19 @@ export const feedApi = {
     return unwrap(result);
   },
 
+  async deletePost(postId, token) {
+    const result = await http.delete(`/posts/${postId}`, { token });
+    return unwrap(result);
+  },
+
+  async getMyPosts(token) {
+    const result = await http.get('/posts/mine', { token });
+    return unwrap(result);
+  },
+
   async addEndorsement(body, idempotencyKey, token) {
     const result = await http.post('/endorsements', body, { token, headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {} });
     return unwrap(result);
   },
 };
+

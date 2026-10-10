@@ -8,6 +8,7 @@ import { h } from '../utils/dom.js';
 import { readDb, resetDb, writeDb } from '../mock/db.js';
 import { store } from '../store.js';
 import { passportApi } from '../api/passport.api.js';
+import { bookingsApi } from '../api/bookings.api.js';
 import { eventBus } from '../mock/events.js';
 import { EVENT_NAMES } from '../../../shared/constants.js';
 
@@ -168,16 +169,34 @@ export function DevInspector({ navigate }) {
         },
       }, '📡 Trigger Event: Customer Posts New Job');
 
+      const unregisterSwBtn = h('button', {
+        className: 'wc-button wc-button--outline wc-full',
+        onClick: async () => {
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+              await registration.unregister();
+            }
+            alert('All service workers unregistered.');
+          } else {
+            alert('Service workers not supported in this browser.');
+          }
+        },
+      }, '🧹 Unregister Service Worker');
+
       contentArea.append(
         h('div', { className: 'wc-dev-controls-grid' },
+          h('p', { className: 'wc-hint' }, `App Version: 1.0.0-phase-a`),
           resetBtn,
           tamperBtn,
           timeTravelBtn,
           eventRadarBtn,
-          eventJobBtn
+          eventJobBtn,
+          unregisterSwBtn
         )
       );
     }
+
 
     if (activeTab === 'session') {
       const db = readDb();
@@ -185,9 +204,10 @@ export function DevInspector({ navigate }) {
       const workerSwitchBtn = h('button', {
         className: 'wc-button wc-button--primary wc-full',
         onClick: () => {
-          db.session = { userId: 'user-worker-ravi', refreshToken: 'mock-refresh-ravi', accessToken: 'mock-access-ravi' };
+          const worker = db.users.find((user) => user.id === 'user-worker-ravi');
+          db.session = { userId: worker.id, refreshToken: 'mock-refresh-ravi' };
           writeDb(db);
-          store.set({ session: db.session });
+          store.setSession({ ...db.session, user: worker, accessToken: `mock-access-${worker.id}-dev` });
           alert('Switched session to Demo Worker: Ravi Kumar');
           navigate('/w/home', { replace: true });
         },
@@ -196,18 +216,35 @@ export function DevInspector({ navigate }) {
       const customerSwitchBtn = h('button', {
         className: 'wc-button wc-button--outline wc-full',
         onClick: () => {
-          db.session = { userId: 'user-customer-meera', refreshToken: 'mock-refresh-meera', accessToken: 'mock-access-meera' };
+          const customer = db.users.find((user) => user.id === 'user-customer-meera');
+          db.session = { userId: customer.id, refreshToken: 'mock-refresh-meera' };
           writeDb(db);
-          store.set({ session: db.session });
+          store.setSession({ ...db.session, user: customer, accessToken: `mock-access-${customer.id}-dev` });
           alert('Switched session to Demo Customer: Meera Nair');
           navigate('/c/find', { replace: true });
         },
       }, '👤 Switch to Demo Customer (Meera Nair)');
 
+      const pendingBooking = db.bookings.find((booking) => booking.workerId === db.session?.userId && booking.status === 'pending');
+      const confirmBookingBtn = h('button', {
+        className: 'wc-button wc-button--outline wc-full',
+        disabled: !pendingBooking,
+        onClick: async (event) => {
+          if (!pendingBooking) return;
+          event.currentTarget.disabled = true;
+          try {
+            await bookingsApi.confirmBooking(pendingBooking.id, store.get().session?.accessToken);
+            alert('Pending booking confirmed. The customer will see the update.');
+            renderTabContent();
+          } catch (error) { alert(error.message || 'Could not confirm this booking.'); event.currentTarget.disabled = false; }
+        },
+      }, pendingBooking ? '✓ Confirm Ravi’s next pending booking' : 'No pending bookings for this worker');
+
       contentArea.append(
         h('div', { className: 'wc-dev-controls-grid' },
           h('p', { className: 'wc-lead' }, `Current Active Session: ${db.session?.userId || 'Logged Out'}`),
           workerSwitchBtn,
+          confirmBookingBtn,
           customerSwitchBtn
         )
       );

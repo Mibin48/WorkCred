@@ -1,14 +1,26 @@
 {
-  "name": "WorkCred",
+  "name": "WorkCred — Proof of work, work near you",
   "short_name": "WorkCred",
-  "description": "Proof of work, work near you.",
+  "description": "Daily-wage worker hiring and verified tamper-proof Work Passport.",
   "start_url": "/app",
   "scope": "/app/",
   "display": "standalone",
-  "background_color": "#f4f0ea",
-  "theme_color": "#f4f0ea",
+  "orientation": "portrait",
+  "background_color": "#FAF6F0",
+  "theme_color": "#1B1715",
   "icons": [
-    { "src": "/assets/icons/workcred-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/assets/icons/workcred-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    {
+      "src": "/assets/workcred-mark.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/workcred-mark.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
+
