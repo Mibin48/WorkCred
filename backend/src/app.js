@@ -173,6 +173,9 @@ import { uploadRouter } from './modules/uploads/upload.routes.js';
 import { pushRouter } from './modules/push/push.routes.js';
 import { feedRouter } from './modules/feed/feed.routes.js';
 import { reportRouter } from './modules/reports/report.routes.js';
+import { compassRouter } from './modules/compass/compass.routes.js';
+import { availabilityRouter } from './modules/availability/availability.routes.js';
+import { passportRouter } from './modules/passport/passport.routes.js';
 
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/users', userRouter);
@@ -186,6 +189,9 @@ apiRouter.use('/uploads', uploadRouter);
 apiRouter.use('/push', pushRouter);
 apiRouter.use('/feed', feedRouter);
 apiRouter.use('/reports', reportRouter);
+apiRouter.use('/compass', compassRouter);
+apiRouter.use('/availability', availabilityRouter);
+apiRouter.use('/passport', passportRouter);
 
 app.use('/api/v1', apiRouter);
 

@@ -604,20 +604,20 @@ export function renderFind(ctx) {
     void load();
   }
 
-  function queryFor(filters, cursor = 0) {
+  function queryFor(filters, cursor = null) {
     const localityPoint = coordinatesForLocality(filters.area);
     return {
       q: filters.q,
       skills: filters.skills.join(','),
       area: filters.area,
-      lat: localityPoint?.lat ?? user?.location?.coordinates?.[1] ?? 12.9784,
-      lng: localityPoint?.lng ?? user?.location?.coordinates?.[0] ?? 77.6408,
+      lat: localityPoint?.lat ?? user?.location?.coordinates?.[1] ?? 18.5204,
+      lng: localityPoint?.lng ?? user?.location?.coordinates?.[0] ?? 73.8567,
       radiusKm: filters.radiusKm,
       minRate: filters.minRate,
       maxRate: filters.maxRate || 99999,
       minRating: filters.minRating,
       sortBy: filters.sortBy,
-      cursor,
+      cursor: cursor || undefined,
       limit: 18,
     };
   }
@@ -633,7 +633,7 @@ export function renderFind(ctx) {
     }
     moreBtn.disabled = true;
     try {
-      const result = await workersApi.searchWorkers(queryFor(state, append ? nextCursor ?? 0 : 0), token());
+      const result = await workersApi.searchWorkers(queryFor(state, append ? nextCursor : null), token());
       if (version !== queryVersion) return;
       nextCursor = result.nextCursor;
       totalCount = Number(result.total) || (result.workers || []).length;

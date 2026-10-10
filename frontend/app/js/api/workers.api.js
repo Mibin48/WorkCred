@@ -8,7 +8,9 @@ export const workersApi = {
 
   async getWorkerById(workerId, token) {
     const result = await http.get(`/workers/${workerId}`, { token });
-    return unwrap(result);
+    const unwrapped = unwrap(result);
+    const worker = unwrapped.worker || unwrapped;
+    return { ...worker, worker };
   },
 
   /** Toggle save (heart) for a worker. type='save'. Returns { active } */
