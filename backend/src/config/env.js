@@ -152,13 +152,33 @@ export function validateEnv(env = process.env) {
     }
   }
 
+  // Parse allowed origins (supports comma-separated list)
+  let rawOrigins = env.APP_ORIGIN;
+  let parsedOrigins = [];
+  if (rawOrigins && typeof rawOrigins === 'string') {
+    parsedOrigins = rawOrigins.split(',').map((o) => o.trim()).filter(Boolean);
+  }
+
+  if (parsedOrigins.length === 0) {
+    if (isProduction) {
+      errors.push('APP_ORIGIN is required in production.');
+    } else {
+      parsedOrigins = [`http://localhost:${PORT}`, `http://127.0.0.1:${PORT}`];
+    }
+  }
+
+  const primaryOrigin = parsedOrigins[0] || `http://localhost:${PORT}`;
+  const appOriginString = parsedOrigins.join(',');
+
   return {
     valid: errors.length === 0,
     errors,
     config: {
       NODE_ENV,
       PORT,
-      APP_ORIGIN: env.APP_ORIGIN || 'http://localhost:3000',
+      APP_ORIGIN: appOriginString,
+      APP_ORIGINS: parsedOrigins,
+      PRIMARY_APP_ORIGIN: primaryOrigin,
       MONGODB_URI: mongoUri,
       TEST_MONGODB_URI: env.TEST_MONGODB_URI,
       JWT_ACCESS_SECRET: jwtAccess,

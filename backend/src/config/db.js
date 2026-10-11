@@ -35,6 +35,59 @@ function logConnectionTroubleshooting(err, uri) {
   console.error('   4. [DNS / Firewall]: If your network blocks SRV DNS lookups (mongodb+srv://), use Atlas standard connection string (mongodb://).\n');
 }
 
+let isReconnecting = false;
+let reconnectTimer = null;
+let lastConnectionError = null;
+
+export function getLastConnectionError() {
+  return lastConnectionError;
+}
+
+export function isDbConnected() {
+  return mongoose.connection.readyState === 1;
+}
+
+export function stopBackgroundReconnect() {
+  if (reconnectTimer) {
+    clearInterval(reconnectTimer);
+    reconnectTimer = null;
+  }
+  isReconnecting = false;
+}
+
+export function startBackgroundReconnect(uri) {
+  if (isReconnecting || reconnectTimer) return;
+  isReconnecting = true;
+  logger.info('Database background reconnection monitor started (retrying every 30s)...');
+
+  reconnectTimer = setInterval(async () => {
+    if (isDbConnected()) {
+      stopBackgroundReconnect();
+      return;
+    }
+
+    try {
+      logger.info('Attempting background reconnection to MongoDB...');
+      await mongoose.connect(uri, DB_OPTIONS);
+      isConnected = true;
+      lastConnectionError = null;
+      const parsed = parseMongoUri(uri);
+      logger.info(`✅ Successfully reconnected to MongoDB database: ${parsed.dbName} on host: ${parsed.maskedHost}`);
+      stopBackgroundReconnect();
+    } catch (err) {
+      lastConnectionError = err;
+      logger.warn({
+        msg: 'Background MongoDB reconnection attempt failed. Retrying in 30s...',
+        error: err.message,
+      });
+    }
+  }, 30000);
+
+  if (reconnectTimer.unref) {
+    reconnectTimer.unref();
+  }
+}
+
 /**
  * Connect to MongoDB with exponential backoff retry.
  */
@@ -56,11 +109,20 @@ export async function connectDb(uri = process.env.MONGODB_URI, maxRetries = 5) {
       logger.info(`Connecting to MongoDB (${maskedHost}/${dbName}) [Attempt ${attempt}/${maxRetries}]...`);
       await mongoose.connect(uri, DB_OPTIONS);
       isConnected = true;
+      lastConnectionError = null;
+      stopBackgroundReconnect();
       logger.info(`✅ Successfully connected to MongoDB database: ${dbName} on host: ${maskedHost}`);
       return mongoose.connection;
     } catch (err) {
+      lastConnectionError = err;
       logConnectionTroubleshooting(err, uri);
       if (attempt >= maxRetries) {
+        if (process.env.NODE_ENV === 'development') {
+          logger.warn(`Failed initial connection after ${maxRetries} attempts in development. Server will stay up and retry in background.`);
+          isConnected = false;
+          startBackgroundReconnect(uri);
+          return null;
+        }
         throw new Error(`Failed to connect to MongoDB after ${maxRetries} attempts: ${err.message}`);
       }
       logger.info(`Retrying MongoDB connection in ${delay}ms...`);
@@ -74,6 +136,7 @@ export async function connectDb(uri = process.env.MONGODB_URI, maxRetries = 5) {
  * Disconnect from MongoDB gracefully.
  */
 export async function disconnectDb() {
+  stopBackgroundReconnect();
   if (mongoose.connection.readyState !== 0) {
     await mongoose.disconnect();
     isConnected = false;

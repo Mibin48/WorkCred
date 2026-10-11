@@ -68,13 +68,14 @@ async function runSeed() {
       ]);
     } else {
       console.log('🧹 Cleaning previous sample data (isSample: true)...');
+      const seedPhones = (await generateSeedData()).users.map((u) => u.phone);
       await Promise.all([
-        User.deleteMany({ isSample: true }),
+        User.deleteMany({ $or: [{ isSample: true }, { phone: { $in: seedPhones } }] }),
         Job.deleteMany({ isSample: true }),
         Booking.deleteMany({ isSample: true }),
         PassportEntry.deleteMany({ isSample: true }, { _forceLedgerReset: true }),
         Availability.deleteMany({ isSample: true }),
-        RateStat.deleteMany({ isSample: true }),
+        RateStat.deleteMany({ $or: [{ isSample: true }, { isSeed: true }] }),
         Post.deleteMany({ isSample: true }),
         Follow.deleteMany({ isSample: true }),
         Endorsement.deleteMany({ isSample: true }),
@@ -107,19 +108,11 @@ async function runSeed() {
     console.log(`   • Follows: ${data.follows.length}`);
     console.log(`   • Endorsements: ${data.endorsements.length}`);
 
-    // Print demo credentials & active booking handshake codes ONLY in development
     if (config.NODE_ENV === 'development') {
-      const activeBookings = data.bookings.filter((b) => ['pending', 'confirmed', 'in_progress'].includes(b.status));
-      console.log('\n🔑 Demo Accounts (Development Only):');
-      console.log('   • Demo Worker:   Phone 9000000001 (Ravi Kumar - Electrician)');
-      console.log('   • Demo Customer: Phone 9000000002 (Meera Nair)');
-      console.log('\n🔐 Active Booking Handshake Codes (Decrypted for Dev Testing):');
-      for (const b of activeBookings) {
-        const startCode = decrypt(b.startCodeEnc);
-        const finishCode = decrypt(b.finishCodeEnc);
-        console.log(`   • [${b._id}] Status: ${b.status.toUpperCase()} | Start Code: ${startCode} | Finish Code: ${finishCode}`);
-      }
-      console.log('');
+      console.log('\n🔑 Demo Accounts (Sample accounts, development mode only):');
+      console.log('   • Demo Worker:   Ravi Kumar (Electrician)');
+      console.log('   • Demo Customer: Meera Nair (Homeowner)');
+      console.log('   • Fixed Dev OTP: 123456\n');
     }
 
     await disconnectDb();

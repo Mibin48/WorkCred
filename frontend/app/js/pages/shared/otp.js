@@ -3,7 +3,7 @@ import { en } from '../../i18n/en.js';
 import { Button, ErrorState, OtpInput } from '../../components/index.js';
 import { authLayout } from '../../layouts/authLayout.js';
 
-export function renderOtp({ navigate, phone, onSuccess }) {
+export function renderOtp({ navigate, phone, onSuccess, auth }) {
   const error = h('p', { className: 'wc-form-error', role: 'alert', hidden: true });
   const group = OtpInput({ onChange: () => { error.hidden = true; } });
   const verify = Button({ label: en.otp.submit, type: 'submit', className: 'wc-full' });
@@ -25,7 +25,7 @@ export function renderOtp({ navigate, phone, onSuccess }) {
   startTimer();
   resend.addEventListener('click', async () => {
     resend.disabled = true;
-    try { await window.workcred.auth.requestOtp(phone); startTimer(); }
+    try { await auth.requestOtp(phone); startTimer(); }
     catch (reason) { error.textContent = reason.message || en.errors.generic; error.hidden = false; resend.disabled = false; }
   });
   const form = h('form', { className: 'wc-form', onSubmit: async (event) => {
@@ -33,7 +33,7 @@ export function renderOtp({ navigate, phone, onSuccess }) {
     if (group.getValue().length !== 6) { error.textContent = en.otp.required; error.hidden = false; return; }
     verify.disabled = true; verify.textContent = en.common.working;
     try {
-      const session = await window.workcred.auth.verifyOtp(phone, group.getValue());
+      const session = await auth.verifyOtp(phone, group.getValue());
       clearInterval(interval);
       onSuccess(session.user);
     } catch (reason) {

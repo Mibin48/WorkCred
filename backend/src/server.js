@@ -4,38 +4,93 @@
  */
 
 import http from 'node:http';
+import https from 'node:https';
+import fs from 'node:fs';
 import { app } from './app.js';
 import { config } from './config/env.js';
-import { connectDb, disconnectDb } from './config/db.js';
+import { connectDb, disconnectDb, isDbConnected } from './config/db.js';
 import { initSocketServer, closeSocketServer } from './realtime/socket.js';
 import { startSweep, stopSweep } from './jobs/sweep.js';
 import { logger } from './utils/logger.js';
+import { printStartupBanner, getLanIp } from './utils/banner.js';
 
 let server;
 
 async function startServer() {
+  const isLanMode = process.argv.includes('--lan') || process.env.LAN_MODE === '1' || process.env.LAN_MODE === 'true';
+  const bindHost = isLanMode ? '0.0.0.0' : '127.0.0.1';
+
+  if (isLanMode) {
+    const lanIp = getLanIp();
+    if (lanIp) {
+      const lanOrigin = `http://${lanIp}:${config.PORT}`;
+      if (!config.APP_ORIGINS.includes(lanOrigin)) {
+        config.APP_ORIGINS.push(lanOrigin);
+      }
+    }
+  }
+
+  // Check for local TLS certificates (optional HTTPS)
+  const certPath = process.env.TLS_CERT_FILE;
+  const keyPath = process.env.TLS_KEY_FILE;
+  let isHttps = false;
+  let tlsOptions = null;
+
+  if (certPath && keyPath && fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+    try {
+      tlsOptions = {
+        cert: fs.readFileSync(certPath),
+        key: fs.readFileSync(keyPath),
+      };
+      isHttps = true;
+    } catch (tlsErr) {
+      logger.warn({ msg: 'Failed to read TLS certificate/key files, falling back to HTTP', error: tlsErr.message });
+    }
+  }
+
   try {
     // 1. Establish Database Connection
     if (config.MONGODB_URI) {
-      await connectDb(config.MONGODB_URI);
+      try {
+        await connectDb(config.MONGODB_URI);
+      } catch (err) {
+        if (config.NODE_ENV === 'production') {
+          throw err;
+        }
+        logger.warn({ msg: 'Database connection failed; server will continue running in offline/unreachable fallback mode', error: err.message });
+      }
     } else {
       logger.warn('Starting server without MONGODB_URI (test or development mode).');
     }
 
     // 2. Start Background Sweep Worker (clean up expired jobs/bookings)
-    if (config.NODE_ENV !== 'test') {
+    if (config.NODE_ENV !== 'test' && isDbConnected()) {
       startSweep(60000);
     }
 
-    // 3. Create HTTP Server & Attach Socket.io
-    server = http.createServer(app);
-    initSocketServer(server, { appOrigin: config.APP_ORIGIN });
+    // 3. Create HTTP/HTTPS Server & Attach Socket.io
+    server = isHttps ? https.createServer(tlsOptions, app) : http.createServer(app);
+    initSocketServer(server, { appOrigins: config.APP_ORIGINS });
+
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`\n❌ Error: Port ${config.PORT} is already in use by another process.`);
+        console.error(`   To run WorkCred on an alternate port, pass PORT=<number>, e.g.:`);
+        console.error(`     PORT=${config.PORT + 1} npm start\n`);
+        process.exit(1);
+      } else {
+        logger.fatal({ msg: 'Server network error', error: err.message, stack: err.stack });
+        process.exit(1);
+      }
+    });
 
     // 4. Start Listening
-    server.listen(config.PORT, () => {
-      logger.info(`🚀 WorkCred API server running in ${config.NODE_ENV} mode on port ${config.PORT}`);
-      logger.info(`   Local API URL: http://localhost:${config.PORT}/api/v1/health`);
-      logger.info(`   App Origin: ${config.APP_ORIGIN}`);
+    server.listen(config.PORT, bindHost, async () => {
+      if (config.NODE_ENV !== 'test') {
+        await printStartupBanner({ config, isLanMode, isHttps });
+      } else {
+        logger.info(`WorkCred API test server running on port ${config.PORT}`);
+      }
     });
   } catch (err) {
     logger.fatal({ msg: 'Fatal error during server startup', error: err.message, stack: err.stack });

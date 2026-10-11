@@ -107,6 +107,8 @@ export function friendlyError(err) {
     JOB_FILLED: 'This job has already been filled.',
     INVALID_TRANSITION: 'This action is not allowed in the current status.',
     VALIDATION_ERROR: err.message || 'Please check your inputs.',
+    UPLOADS_UNAVAILABLE: 'Photo upload is not set up on this computer.',
+    SERVICE_UNAVAILABLE: err.message || 'The database is not reachable. Check your internet connection and the Atlas IP access list, then try again.',
     SERVER_ERROR: 'Something went wrong on our end. Please try again.',
   };
   return msgMap[code] ?? err.message ?? 'Something went wrong. Please try again.';

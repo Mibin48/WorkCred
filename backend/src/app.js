@@ -14,7 +14,7 @@ import cookieParser from 'cookie-parser';
 import mongoSanitize from 'express-mongo-sanitize';
 
 import { config } from './config/env.js';
-import { isDbReady } from './config/db.js';
+import { isDbReady, isDbConnected } from './config/db.js';
 import { httpLogger } from './utils/logger.js';
 import { ok } from './utils/response.js';
 import { createRateLimiter } from './middleware/rateLimit.js';
@@ -46,7 +46,7 @@ app.use(
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
         imgSrc: ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
-        connectSrc: ["'self'", config.APP_ORIGIN, 'https://res.cloudinary.com', 'https://api.cloudinary.com'],
+        connectSrc: ["'self'", ...config.APP_ORIGINS, 'https://res.cloudinary.com', 'https://api.cloudinary.com'],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: config.NODE_ENV === 'production' ? [] : null,
       },
@@ -66,7 +66,7 @@ app.use(mongoSanitize());
 // CORS Configuration
 app.use(
   cors({
-    origin: config.APP_ORIGIN,
+    origin: config.APP_ORIGINS,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key', 'X-Request-Id', 'X-Chaos'],
@@ -158,6 +158,23 @@ apiRouter.get('/health/ready', async (_req, res) => {
     },
     'WorkCred API and database are ready.'
   );
+});
+
+// Database connectivity guard for all data endpoints
+apiRouter.use((req, res, next) => {
+  if (req.path === '/health' || req.path === '/health/ready') {
+    return next();
+  }
+  if (!isDbConnected()) {
+    return res.status(503).json({
+      success: false,
+      error: {
+        code: 'SERVICE_UNAVAILABLE',
+        message: 'The database is not reachable. Check your internet connection and the Atlas IP access list, then try again.',
+      },
+    });
+  }
+  next();
 });
 
 // Feature Routes

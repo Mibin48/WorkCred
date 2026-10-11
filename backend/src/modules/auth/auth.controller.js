@@ -29,6 +29,42 @@ export function clearRefreshCookie(res) {
   });
 }
 
+function isAllowedAppOrigin(origin, req) {
+  if (!origin) return true;
+  const allowed = Array.isArray(config.APP_ORIGINS) ? config.APP_ORIGINS : [config.APP_ORIGIN];
+  if (allowed.includes(origin)) return true;
+  if (config.NODE_ENV === 'production') return false;
+
+  const requestOrigin = `${req.protocol}://${req.get('host')}`;
+  if (origin === requestOrigin) return true;
+
+  try {
+    const received = new URL(origin);
+    const loopbackHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
+    if (!loopbackHosts.has(received.hostname)) {
+      return false;
+    }
+    const currentPort = req.get('host')?.split(':')[1] || '';
+    for (const exp of allowed) {
+      try {
+        const expected = new URL(exp);
+        if (
+          expected.protocol === received.protocol &&
+          loopbackHosts.has(expected.hostname) &&
+          (expected.port === received.port || received.port === String(config.PORT) || received.port === currentPort)
+        ) {
+          return true;
+        }
+      } catch {
+        // ignore malformed candidate
+      }
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Enforce CSRF header and allowed origins on refresh and logout.
  */
@@ -40,14 +76,20 @@ export function verifyCsrf(req, _res, next) {
 
   const origin = req.headers.origin;
   const referer = req.headers.referer;
-  const appOrigin = config.APP_ORIGIN;
-
-  if (origin && origin !== appOrigin) {
+  if (!isAllowedAppOrigin(origin, req)) {
     return next(new AppError('FORBIDDEN', 'Cross-origin request rejected.', 403));
   }
 
-  if (referer && !referer.startsWith(appOrigin)) {
-    return next(new AppError('FORBIDDEN', 'Invalid referer header.', 403));
+  if (referer) {
+    let refererOrigin;
+    try {
+      refererOrigin = new URL(referer).origin;
+    } catch {
+      return next(new AppError('FORBIDDEN', 'Invalid referer header.', 403));
+    }
+    if (!isAllowedAppOrigin(refererOrigin, req)) {
+      return next(new AppError('FORBIDDEN', 'Invalid referer header.', 403));
+    }
   }
 
   next();

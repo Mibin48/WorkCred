@@ -9,7 +9,7 @@ import { http } from '../../api/http.js';
 import { APP_VERSION } from '../../config.js';
 import { store } from '../../store.js';
 
-export function renderMe({ navigate, user }) {
+export function renderMe({ navigate, user, auth, users, toast }) {
   const worker = user.role === 'worker';
   const name = Field({ id: 'me-name', label: en.onboarding.name, required: true, value: user.name ?? '', autocomplete: 'name' });
   const area = Field({ id: 'me-area', label: en.onboarding.area, required: true, value: user.area ?? '' });
@@ -21,15 +21,15 @@ export function renderMe({ navigate, user }) {
     try {
       const profile = { name: name.querySelector('input').value.trim(), area: area.querySelector('input').value.trim(), city: city.querySelector('select').value };
       if (worker) { profile.skills = user.skills ?? []; profile.rate = user.rate; profile.rateUnit = user.rateUnit; }
-      await window.workcred.users.updateMe(profile);
-      window.workcred.toast(en.profile.saved, 'success');
+      await users.updateMe(profile);
+      toast(en.profile.saved, 'success');
       navigate(worker ? '/w/me' : '/c/me');
     } catch (reason) { error.textContent = reason.message || en.errors.generic; error.hidden = false; }
     finally { submit.disabled = false; }
   } }, name, area, city, error, submit);
   const logout = Button({ label: en.profile.logout, variant: 'outline', onClick: async () => {
     logout.disabled = true;
-    try { await window.workcred.auth.logout(); navigate('/welcome', { replace: true }); }
+    try { await auth.logout(); navigate('/welcome', { replace: true }); }
     catch (reason) { error.textContent = reason.message || en.errors.generic; error.hidden = false; logout.disabled = false; }
   } });
 
@@ -68,4 +68,3 @@ export function renderMe({ navigate, user }) {
   const shell = worker ? workerShell : customerShell;
   return shell({ title: en.nav.me, active: worker ? '/w/me' : '/c/me', navigate, user, content: page });
 }
-

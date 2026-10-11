@@ -446,23 +446,30 @@ export async function generateSeedData() {
     });
   }
 
-  // 11. Seed Baseline Compass `rateStats`
+  // 11. Seed Baseline Compass `rateStats` (unique per skill + localityKey)
+  const rateStatMap = new Map();
   for (const loc of LOCALITIES) {
+    const locKey = localityKey(loc.lat, loc.lng);
     for (const skill of SKILLS) {
-      rateStats.push({
-        _id: `stat-${loc.name}-${skill}`,
-        locality: loc.name,
-        city: 'Pune',
-        skill,
-        localityKey: localityKey(loc.lat, loc.lng),
-        p25: 75,
-        median: 95,
-        p75: 125,
-        sampleSize: 15,
-        isSeed: true,
-      });
+      const compoundKey = `${skill}:${locKey}`;
+      if (!rateStatMap.has(compoundKey)) {
+        rateStatMap.set(compoundKey, {
+          _id: `stat-${loc.name}-${skill}`,
+          locality: loc.name,
+          city: 'Pune',
+          skill,
+          localityKey: locKey,
+          p25: 75,
+          median: 95,
+          p75: 125,
+          sampleSize: 15,
+          isSeed: true,
+          isSample: true,
+        });
+      }
     }
   }
+  rateStats.push(...rateStatMap.values());
 
   return {
     users,

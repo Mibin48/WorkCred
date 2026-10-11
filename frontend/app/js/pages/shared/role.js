@@ -3,7 +3,7 @@ import { en } from '../../i18n/en.js';
 import { Button, Card } from '../../components/index.js';
 import { authLayout } from '../../layouts/authLayout.js';
 
-export function renderRole({ navigate, pendingRole }) {
+export function renderRole({ navigate, pendingRole, users }) {
   let selected = pendingRole || '';
   const error = h('p', { className: 'wc-form-error', role: 'alert', hidden: true });
   const choices = h('div', { className: 'wc-role-cards' });
@@ -20,7 +20,7 @@ export function renderRole({ navigate, pendingRole }) {
   const submit = Button({ label: en.role.submit, className: 'wc-full', onClick: async () => {
     if (!selected) { error.textContent = en.role.body; error.hidden = false; return; }
     submit.disabled = true;
-    try { await window.workcred.users.setRole(selected); navigate('/onboarding'); }
+    try { await users.setRole(selected); navigate('/onboarding'); }
     catch (reason) { error.textContent = reason.message || en.errors.generic; error.hidden = false; }
     finally { submit.disabled = false; }
   } });

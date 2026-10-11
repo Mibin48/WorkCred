@@ -13,7 +13,7 @@
  * - NEVER cache ?dev=1 or dev inspector requests.
  */
 
-const CACHE_VERSION = 'workcred-v1.0.0-phase-a';
+const CACHE_VERSION = 'workcred-v1.0.0-phase-b';
 const SHELL_CACHE = `shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `runtime-${CACHE_VERSION}`;
 

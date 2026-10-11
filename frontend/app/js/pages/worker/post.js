@@ -69,7 +69,16 @@ export function renderWorkerPost({ navigate, user, toast }) {
         try {
           afterPhotoStatus.textContent = 'Compressing…';
           afterPhotoDataUrl = await compressImage(file);
-          afterPhotoStatus.textContent = '✓ Photo attached';
+          try {
+            await uploadsApi.signUpload({ purpose: 'post' }, token());
+            afterPhotoStatus.textContent = '✓ Photo attached';
+          } catch (uploadErr) {
+            if (uploadErr.code === 'UPLOADS_UNAVAILABLE' || uploadErr.status === 503) {
+              afterPhotoStatus.textContent = en.errors.uploadsUnavailable || 'Photo upload is not set up on this computer';
+            } else {
+              afterPhotoStatus.textContent = '✓ Photo attached';
+            }
+          }
           afterPreviewImg.src = afterPhotoDataUrl;
           afterPreviewImg.hidden = false;
           updatePreview();
@@ -98,7 +107,16 @@ export function renderWorkerPost({ navigate, user, toast }) {
         try {
           beforePhotoStatus.textContent = 'Compressing…';
           beforePhotoDataUrl = await compressImage(file);
-          beforePhotoStatus.textContent = '✓ Photo attached';
+          try {
+            await uploadsApi.signUpload({ purpose: 'post' }, token());
+            beforePhotoStatus.textContent = '✓ Photo attached';
+          } catch (uploadErr) {
+            if (uploadErr.code === 'UPLOADS_UNAVAILABLE' || uploadErr.status === 503) {
+              beforePhotoStatus.textContent = en.errors.uploadsUnavailable || 'Photo upload is not set up on this computer';
+            } else {
+              beforePhotoStatus.textContent = '✓ Photo attached';
+            }
+          }
           beforePreviewImg.src = beforePhotoDataUrl;
           beforePreviewImg.hidden = false;
           updatePreview();

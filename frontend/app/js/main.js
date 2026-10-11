@@ -96,7 +96,7 @@ const router = createRouter(async (route) => {
   if (path === '/404') {
     root.replaceChildren(h('div', { className: 'wc-app-view' }, renderNotFound({ navigate: router.navigate, homePath: user?.role === 'worker' ? '/w/home' : user?.role === 'customer' ? '/c/find' : '/welcome' })));
   } else {
-    const ctx = { navigate: router.navigate, user: user ?? {}, phone: flow.phone, pendingRole: flow.pendingRole, toast, dev: route.search.get('dev') === '1', params: route.params, hashParams: route.hashParams };
+    const ctx = { navigate: router.navigate, user: user ?? {}, phone: flow.phone, pendingRole: flow.pendingRole, auth: authApi, users: usersApi, toast, dev: route.search.get('dev') === '1', params: route.params, hashParams: route.hashParams };
     let view;
     switch (route.route) {
       case '/': case '/welcome': view = renderWelcome(ctx); break;
@@ -263,7 +263,16 @@ if (typeof BroadcastChannel !== 'undefined') {
   }
 }
 
-// 5. Initial Boot Sequence with Brand Splash
+// 5. Global window.workcred Bridge for Isomorphic Page Action Dispatchers
+window.workcred = {
+  auth: authApi,
+  users: usersApi,
+  store,
+  router,
+  toast,
+};
+
+// 6. Initial Boot Sequence with Brand Splash
 if (root && !root.hasChildNodes()) {
   root.innerHTML = `
     <div class="wc-app-splash" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;text-align:center;">
@@ -288,5 +297,4 @@ if (!location.hash) {
 } else {
   await router.start();
 }
-
 

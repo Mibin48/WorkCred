@@ -14,6 +14,7 @@ import { config } from '../config.js';
 import { store } from '../store.js';
 import { en } from '../i18n/en.js';
 import { cacheResponse, getCachedResponse, isWhitelistedPath } from '../offline/cache.js';
+import { setRefreshSessionHint } from './sessionHint.js';
 
 // In-memory access token storage
 let inMemoryAccessToken = null;
@@ -35,6 +36,7 @@ if (typeof BroadcastChannel !== 'undefined') {
       if (event.data?.type === 'logout') {
         inMemoryAccessToken = null;
         store.setSession(null);
+        setRefreshSessionHint('none');
         if (typeof location !== 'undefined' && location.hash !== '#/welcome') {
           location.hash = '#/welcome';
         }
@@ -168,6 +170,7 @@ export async function executeTokenRefresh() {
       // Token reused or unrecoverable refresh failure: clear session
       setAccessToken(null);
       store.setSession(null);
+      if (response.status === 401) setRefreshSessionHint('none');
       broadcastAuthEvent('logout');
 
       const localizedMsg =

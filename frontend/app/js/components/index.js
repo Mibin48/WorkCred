@@ -104,7 +104,13 @@ export function TopBar({ title, location, actions }) {
 export function Spinner({ label = en.common.loading }) { return h('span', { className: 'wc-spinner', role: 'status', 'aria-label': label }); }
 export function Skeleton({ rows = 3 }) { return h('div', { className: 'wc-skeleton-list', 'aria-hidden': 'true' }, Array.from({ length: rows }, (_, i) => h('span', { className: `wc-skeleton wc-skeleton--${i % 2 ? 'short' : 'long'}` }))); }
 export function EmptyState({ title, body, action }) { return h('section', { className: 'wc-empty' }, h('span', { className: 'wc-empty-mark', 'aria-hidden': 'true' }, '✳'), h('h2', {}, title), h('p', {}, body), action ?? null); }
-export function ErrorState({ message, onRetry }) { return h('section', { className: 'wc-error-state', role: 'alert' }, h('p', {}, message), Button({ label: en.common.retry, variant: 'outline', onClick: onRetry })); }
+export function ErrorState({ message, hint, onRetry }) {
+  return h('section', { className: 'wc-error-state', role: 'alert' },
+    h('p', {}, message),
+    hint ? h('p', { className: 'wc-hint', style: 'margin-top:0.5rem;font-size:0.875rem;' }, hint) : null,
+    Button({ label: en.common.retry, variant: 'outline', onClick: onRetry })
+  );
+}
 
 export function Toast({ message, kind = 'info' }) { return h('div', { className: `wc-toast wc-toast--${kind}`, role: 'status', 'aria-live': 'polite' }, message); }
 

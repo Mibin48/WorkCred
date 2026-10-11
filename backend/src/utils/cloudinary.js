@@ -28,7 +28,7 @@ export function generateUploadSignature({
   apiSecret = process.env.CLOUDINARY_API_SECRET || config.CLOUDINARY_API_SECRET,
 }) {
   if (!cloudName || !apiKey || !apiSecret || cloudName === 'placeholder' || apiKey === 'placeholder' || apiSecret === 'placeholder') {
-    throw new AppError('SERVICE_UNAVAILABLE', 'Cloudinary storage credentials are not configured.', 503);
+    throw new AppError('UPLOADS_UNAVAILABLE', 'Photo upload is not configured on this machine.', 503);
   }
 
   if (!userId) {

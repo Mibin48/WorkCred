@@ -13,6 +13,7 @@ import { store } from '../store.js';
 import { config } from '../config.js';
 import { clearOfflineCache } from '../offline/cache.js';
 import { clearQueue } from '../offline/queue.js';
+import { getRefreshSessionHint, setRefreshSessionHint } from './sessionHint.js';
 
 export const authApi = {
   /**
@@ -41,6 +42,7 @@ export const authApi = {
     };
 
     store.setSession(session);
+    if (!config.USE_MOCK) setRefreshSessionHint('active');
 
     // If running in mock mode, sync mock database session dynamically
     if (config.USE_MOCK) {
@@ -60,13 +62,27 @@ export const authApi = {
    */
   async restoreSession() {
     try {
+      // Avoid sending a refresh request on every anonymous app visit. A single
+      // initial probe is still made for existing cookies during migration.
+      if (!config.USE_MOCK && getRefreshSessionHint() === 'none') return null;
+
       if (config.USE_MOCK) {
         const { readDb } = await import('../mock/db.js');
         const mockSession = readDb().session;
         if (!mockSession) return null;
       }
 
-      const res = await http.post('/auth/refresh', {});
+      let res;
+      try {
+        res = await http.post('/auth/refresh', {});
+      } catch (err) {
+        // A missing/expired cookie is an anonymous session, not a boot failure.
+        if (err?.status === 401) setRefreshSessionHint('none');
+        setAccessToken(null);
+        store.setSession(null);
+        return null;
+      }
+
       const data = unwrap(res);
 
       if (data?.accessToken) {
@@ -89,6 +105,7 @@ export const authApi = {
       };
 
       store.setSession(session);
+      if (!config.USE_MOCK) setRefreshSessionHint('active');
       return session;
     } catch {
       setAccessToken(null);
@@ -108,6 +125,7 @@ export const authApi = {
     } finally {
       setAccessToken(null);
       store.setSession(null);
+      if (!config.USE_MOCK) setRefreshSessionHint('none');
       void clearOfflineCache();
       clearQueue();
       broadcastAuthEvent('logout');

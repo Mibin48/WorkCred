@@ -121,7 +121,8 @@ passportRouter.get(
       throw new AppError('NOT_FOUND', 'Worker passport not found.', 404);
     }
 
-    const passportUrl = `${config.APP_ORIGIN}/p/${worker.passportSlug}`;
+    const primaryOrigin = config.PRIMARY_APP_ORIGIN || (config.APP_ORIGINS && config.APP_ORIGINS[0]) || config.APP_ORIGIN;
+    const passportUrl = `${primaryOrigin}/p/${worker.passportSlug}`;
     return ok(res, {
       slug: worker.passportSlug,
       url: passportUrl,

@@ -5,7 +5,7 @@ import { authLayout } from '../../layouts/authLayout.js';
 import { getCurrentArea } from '../../utils/geo.js';
 import { SKILLS } from '../../../../shared/constants.js';
 
-export function renderOnboarding({ navigate, user }) {
+export function renderOnboarding({ navigate, user, users }) {
   const worker = user?.role === 'worker';
   let selectedSkills = Array.isArray(user?.skills) ? user.skills.map((skill) => skill.toLowerCase()) : [];
   const error = h('p', { className: 'wc-form-error', role: 'alert', hidden: true });
@@ -51,7 +51,7 @@ export function renderOnboarding({ navigate, user }) {
         if (!Number.isFinite(rate) || rate < 1) { error.textContent = en.forms.required; error.hidden = false; return; }
         Object.assign(profile, { skills: selectedSkills, rate, rateUnit: form.querySelector('#profile-rate-unit').value });
       }
-      await window.workcred.users.updateMe(profile);
+      await users.updateMe(profile);
       status.textContent = en.onboarding.saved; status.hidden = false;
       navigate(worker ? '/w/home' : '/c/find');
     } catch (reason) { error.textContent = reason.message || en.errors.generic; error.hidden = false; }

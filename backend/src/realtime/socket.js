@@ -139,14 +139,14 @@ export const EVENT_PROJECTORS = {
 export function initSocketServer(httpServer, options = {}) {
   if (ioInstance) return ioInstance;
 
-  const appOrigin = options.appOrigin || config.APP_ORIGIN || 'http://localhost:3000';
+  const allowedOrigins = options.appOrigins || config.APP_ORIGINS || [config.APP_ORIGIN || 'http://localhost:3000'];
 
   const io = new Server(httpServer, {
     path: '/socket.io',
     transports: ['websocket', 'polling'],
     maxHttpBufferSize: 10 * 1024, // 10 KB
     cors: {
-      origin: appOrigin,
+      origin: allowedOrigins,
       credentials: true,
     },
     ...options,
@@ -155,8 +155,8 @@ export function initSocketServer(httpServer, options = {}) {
   // 1. Handshake Authentication Middleware
   io.use(async (socket, next) => {
     const origin = socket.handshake.headers.origin;
-    if (origin && appOrigin && origin !== appOrigin && config.NODE_ENV === 'production') {
-      logger.warn({ msg: 'Socket connection rejected: origin mismatch', origin, expected: appOrigin });
+    if (origin && Array.isArray(allowedOrigins) && !allowedOrigins.includes(origin) && config.NODE_ENV === 'production') {
+      logger.warn({ msg: 'Socket connection rejected: origin mismatch', origin, expected: allowedOrigins });
       return next(new Error('Origin not allowed'));
     }
 

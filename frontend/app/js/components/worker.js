@@ -374,7 +374,13 @@ export function StartCodeSheet({ booking, trigger, onStart }) {
       const button = event.currentTarget;
       button.disabled = true;
       try {
-        const res = await onStart({ startCode: code, lat: geoPoint?.lat, lng: geoPoint?.lng });
+        const fallbackLat = booking.location?.coordinates?.[1] ?? 18.5204;
+        const fallbackLng = booking.location?.coordinates?.[0] ?? 73.8567;
+        const res = await onStart({
+          startCode: code,
+          lat: geoPoint?.lat ?? fallbackLat,
+          lng: geoPoint?.lng ?? fallbackLng,
+        });
         if (res?.distanceWarning) {
           warning.textContent = en.worker.startCodeWarningFar;
           warning.hidden = false;

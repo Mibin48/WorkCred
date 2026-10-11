@@ -20,13 +20,13 @@ export const authRouter = express.Router();
 // Rate Limiters
 const otpRequestIpLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10,
+  max: 200,
   message: 'Too many OTP requests from this network. Please try again later.',
 });
 
 const otpVerifyIpLimiter = createRateLimiter({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 20,
+  max: 200,
   message: 'Too many verification attempts from this network. Please try again later.',
 });
 

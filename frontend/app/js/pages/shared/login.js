@@ -4,7 +4,7 @@ import { Button, ErrorState } from '../../components/index.js';
 import { authLayout } from '../../layouts/authLayout.js';
 import { isIndianMobile, cleanPhone } from '../../utils/validate.js';
 
-export function renderLogin({ navigate, setPhone, pendingRole }) {
+export function renderLogin({ navigate, setPhone, pendingRole, auth }) {
   const error = h('p', { className: 'wc-form-error', role: 'alert', hidden: true });
   const status = h('p', { className: 'wc-form-status', role: 'status', hidden: true });
 
@@ -93,7 +93,7 @@ export function renderLogin({ navigate, setPhone, pendingRole }) {
 
     submit.disabled = true; submit.setAttribute('aria-busy', 'true'); submit.textContent = en.common.working;
     try {
-      const result = await window.workcred.auth.requestOtp(value);
+      const result = await auth.requestOtp(value);
       setPhone(value);
       status.textContent = result.message || en.otp.demo;
       status.hidden = false;
